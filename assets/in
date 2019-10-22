@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+# for jq
+PATH=/usr/local/bin:$PATH
+TMPDIR=${TMPDIR:-/tmp}
+
+payload=$TMPDIR/gltf-request
+cat > $payload <&0
+
+uri=$(jq -r '.source.uri // ""' < $payload)
+branch=$(jq -r '.source.branch // ""' < $payload)
+tickets=$(jq -r '.source.tickets // ""' < $payload)
+
+destination=$TMPDIR/gltf-repo-cache
+
+if [[ -d $destination ]]; then
+    rm -rf $destination
+fi
+
+git clone --bare $uri $destination --branch $branch --tags
+
+cd $destination
+
+log=$(git log --pretty=oneline)
+
+gitLogTicketFinder --tickets $tickets --content "$log"
+
+cd ../
