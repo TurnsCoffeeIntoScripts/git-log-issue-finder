@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// TicketSlice slice containing the extracted tickets from the content of the log that was provided
 var TicketSlice []string
 
 func main() {
