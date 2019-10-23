@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - "1.12"
+
+branches:
+  only:
+    - master
+    - develop
+    - /^feature\/.*$/
+    - /^v\d+\.\d+(\.\d+)?(-\S)?$/
