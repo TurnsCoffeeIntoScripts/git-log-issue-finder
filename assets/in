@@ -15,41 +15,37 @@ payload=$TMPDIR/gltf-request
 cat > $payload <&0
 
 # Extracting configurations from resource configuration
-uri=$(jq -r '.source.uri // ""' < $payload)
-branch=$(jq -r '.source.branch // ""' < $payload)
+git_repo_name=$(jq -r '.source.git_repo_name // ""' < $payload)
 tickets=$(jq -r '.source.tickets // ""' < $payload)
-maxCommit=$(jq -r '.source.maxCommit // ""' < $payload)
+max_commit=$(jq -r '.source.maxCommit // ""' < $payload)
 
 # If maxCommit if specified, then we append it to '--max-count' for the git log command.
 # Otherwise it's left empty
-if [[ ! -z $maxCommit ]]; then
-    maxCommit = "--max-count=$maxCommit"
+if [[ ! -z max_commit ]]; then
+    maxCommit = "--max-count=max_commit"
 else
     maxCommit = ""
 fi
 
 # Set the destination for the cloned repo
-destination=$TMPDIR/gltf-repo-cache
+destination=$git_repo_name
 
-# If it already exists remove it
+# If it already fetch new version otherwise exit with return code 1
 if [[ -d $destination ]]; then
-    rm -rf $destination
+    cd $destination
+    git fetch
+
+    # Execute the git log with optionnal maxCommit
+    log=$(git log --pretty=oneline max_commit)
+
+    # Launch the Go exec 'gitLogTicketFinder'
+    gltfResult=$(gitLogTicketFinder --tickets $tickets --content "$log")
+
+    # Output the result to fd 3
+    echo "${gltfResult}" >&3
+
+    cd ../
+else
+    echo "Git repo $destination does not exist or could not be found"
+    exit 1
 fi
-
-# Execute the clone with:
-#   branch parameter
-#   tags flag
-#   bare falg
-git clone --bare $uri $destination --branch $branch --tags
-
-# Execute the git log with optionnal maxCommit
-cd $destination
-log=$(git log --pretty=oneline $maxCommit)
-
-# Launch the Go exec 'gitLogTicketFinder'
-gltfResult=$(gitLogTicketFinder --tickets $tickets --content "$log")
-
-# Output the result to fd 3
-echo "${gltfResult}" >&3
-
-cd ../
