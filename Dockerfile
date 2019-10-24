@@ -28,6 +28,13 @@ RUN apk --no-cache add \
 
 # Copy the built binary into the bin folder
 COPY --from=builder /app/bin/gitLogTicketFinder /usr/local/bin/
-COPY assets/ /opt/resource/
+
+# Copy the asset scripts into the resource folder
+COPY --from=builder /app/assets/check /opt/resource/check
+COPY --from=builder /app/assets/in /opt/resource/in
+COPY --from=builder /app/assets/out /opt/resource/out
+
+# Ensure the proper permission on the asset scripts
+RUN chmod +x /opt/resource/check /opt/resource/in /opt/resource/out
 
 FROM resource
