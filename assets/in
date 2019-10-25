@@ -42,7 +42,11 @@ if [[ -d $destination ]]; then
     gltfResult=$(gitLogTicketFinder --tickets $tickets --content "$log")
 
     # Output the result to fd 3
-    echo "${gltfResult}" >&3
+    metadataValue=${gltfResult}
+    version="\"version\": { \"ref\": \"ref\",\"key\": \"key\"},"
+    metadata="\"metadata\": [{\"name\": \"gltf\",\"value\": \"$metadataValue\"}]"
+
+    echo "{ $version$metadata }" >&3
 
     cd ../
 else
