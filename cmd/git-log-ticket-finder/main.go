@@ -13,6 +13,8 @@ import (
 var TicketSlice []string
 
 func main() {
+	// The '--tickets' arguments is the comma-separated list of jira project keys
+	// The '--content' is the string in which the 'git log...' command is put
 	ticketRegex := flag.String("tickets", "", "")
 	content := flag.String("content", "", "")
 
