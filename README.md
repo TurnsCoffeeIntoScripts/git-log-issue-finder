@@ -75,7 +75,10 @@ resultFile=${FILENAME}
 if [[ -d ${destination} ]]; then
     cd ${destination}
 
-    log=$(git log --pretty=oneline)
+    # log=$(git log --pretty=oneline)
+    # Here we are getting the git log since the latest annotated tag
+    # The method used to get the log is left for the user to decide
+    log=$(git log --pretty=oneline $(git describe --abbrev=0)..HEAD)
 
     # Launch the Go exec 'gitLogTicketFinder'
     gltfResult=$(gitLogTicketFinder --tickets ${tickets} --content "$log")
