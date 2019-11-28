@@ -1,5 +1,5 @@
 # Based on: https://github.com/vincentbernat/hellogopher/blob/master/Makefile
-PACKAGE  = gitLogTicketFinder
+PACKAGE  = glif
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat $(CURDIR)/.version 2> /dev/null || echo v0)
@@ -20,14 +20,14 @@ all: fmt $(BIN) ; $(info $(M) building executable...) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
-		-o $(BIN)/$(PACKAGE) cmd/git-log-ticket-finder/main.go
+		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 .PHONY: full
 full: fmt lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
-		-o $(BIN)/$(PACKAGE) cmd/git-log-ticket-finder/main.go
+		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 # Tools
 
