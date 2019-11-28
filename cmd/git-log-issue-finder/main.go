@@ -32,16 +32,19 @@ func main() {
 
 	repo, err := git.Clone(memory.NewStorage(), nil, o)
 	if err != nil {
+		fmt.Print(err)
 		log.Fatal("an error occured while instantiating a new repository object")
 	}
 
 	ref, err := repo.Head()
 	if err != nil {
+		fmt.Print(err)
 		log.Fatal("an error occured while retrieving the HEAD reference")
 	}
 
 	iter, err := repo.Log(&git.LogOptions{From: ref.Hash()})
 	if err != nil {
+		fmt.Print(err)
 		log.Fatal("an error occured while retrieving the commit history")
 	}
 
