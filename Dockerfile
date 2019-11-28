@@ -17,7 +17,7 @@ ENV GOMOD /app/go.mod
 # Launch the make tool on the default target
 RUN make
 
-FROM alpine:edge AS resource
+FROM alpine:3.10
 
 RUN apk --no-cache add \
         curl \
@@ -28,5 +28,3 @@ RUN apk --no-cache add \
 
 # Copy the built binary into the bin folder
 COPY --from=builder /app/bin/gitLogTicketFinder /usr/local/bin/
-
-FROM resource
