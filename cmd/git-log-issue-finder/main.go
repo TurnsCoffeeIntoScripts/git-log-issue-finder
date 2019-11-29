@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	"gopkg.in/src-d/go-git.v4/storage/memory"
 	"log"
 	"regexp"
 	"strings"
@@ -16,23 +15,16 @@ var TicketSlice []string
 
 func main() {
 	ticketRegex := flag.String("tickets", "", "Comma-separated list of jira project keys")
-	repoURL := flag.String("repo", "", "The directory of the git repo")
-	username := flag.String("username", "", "Username for the git repo")
-	password := flag.String("password", "", "Password for the git repo")
+	repoDir := flag.String("directory", "", "The directory of the git repo")
 
 	flag.Parse()
 
 	validateParam(ticketRegex, "Missing parameter '--tickets'")
-	validateParam(repoURL, "Missing parameter '--repo'")
-	validateParam(username, "Missing parameter '--username'")
-	validateParam(password, "Missing parameter '--password'")
+	validateParam(repoDir, "Missing parameter '--directory'")
 
-	o := &git.CloneOptions{}
-	o.URL = addCredentialsToURL(*repoURL, *username, *password)
-
-	repo, err := git.Clone(memory.NewStorage(), nil, o)
+	repo, err := git.PlainOpen(*repoDir)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print(err.Error())
 		log.Fatal("an error occured while instantiating a new repository object")
 	}
 
@@ -94,16 +86,4 @@ func validateParam(param *string, msg string) {
 	if param == nil || *param == "" {
 		log.Fatal(msg)
 	}
-}
-
-func addCredentialsToURL(url, username, password string) string {
-	partialURL := strings.Split(url, "://")
-
-	if len(partialURL) >= 2 {
-		return partialURL[0] + "://" + username + ":" + password + "@" + partialURL[1]
-	} else if len(partialURL) == 1 {
-		return "https://" + username + ":" + password + "@" + partialURL[1]
-	}
-
-	return url
 }
