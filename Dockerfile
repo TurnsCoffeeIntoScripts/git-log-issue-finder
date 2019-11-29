@@ -27,4 +27,4 @@ RUN apk --no-cache add \
 ;
 
 # Copy the built binary into the bin folder
-COPY --from=builder /app/bin/gitLogTicketFinder /usr/local/bin/
+COPY --from=builder /app/bin/glif /usr/local/bin/
