@@ -19,3 +19,7 @@ bin/gitLogTicketFinder
 # IDEs
 .idea/
 *.iml
+
+# git
+*.orig
+*.bak
