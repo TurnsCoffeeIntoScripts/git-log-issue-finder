@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/configuration"
 	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/find"
 	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/sort"
 	"gopkg.in/src-d/go-git.v4"
@@ -17,6 +18,7 @@ func main() {
 	// Parameters
 	ticketRegex := flag.String("tickets", "", "Comma-separated list of jira project keys")
 	repoDir := flag.String("directory", "", "The directory of the git repo")
+	diffTags := flag.String("diff-tags", "", "")
 
 	// Flags
 	fullHistory := flag.Bool("full-history", false, "Search the entire git log")
@@ -24,9 +26,12 @@ func main() {
 
 	flag.Parse()
 
-	validateParam(ticketRegex, "Missing parameter '--tickets'")
-	validateParam(repoDir, "Missing parameter '--directory'")
-	if *fullHistory == *sinceLatestTag { // Only one should be set
+	// Validating mandatory params
+	configuration.ValidateParam(ticketRegex, "Missing parameter '--tickets'")
+	configuration.ValidateParam(repoDir, "Missing parameter '--directory'")
+
+	// Only one should be set
+	if *fullHistory == *sinceLatestTag {
 		*fullHistory = true
 		*sinceLatestTag = false
 	}
@@ -42,6 +47,8 @@ func main() {
 		fmt.Print(err)
 		log.Fatal("an error occured while retrieving the HEAD reference")
 	}
+
+	configuration.ExtractLogIter(repo, *diffTags)
 
 	if *sinceLatestTag {
 		commits := make([]*object.Commit, 0)
@@ -85,10 +92,4 @@ func ensureUniqueValues(s []string) []string {
 	}
 
 	return list
-}
-
-func validateParam(param *string, msg string) {
-	if param == nil || *param == "" {
-		log.Fatal(msg)
-	}
 }

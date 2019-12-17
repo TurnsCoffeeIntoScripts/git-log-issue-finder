@@ -1,4 +1,5 @@
 # Based on: https://github.com/vincentbernat/hellogopher/blob/master/Makefile
+# We also use upx: https://upx.github.io/
 PACKAGE  = glif
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
@@ -19,14 +20,21 @@ export GO111MODULE=on
 all: fmt $(BIN) ; $(info $(M) building executable...) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
-		-ldflags '-X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
+		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 .PHONY: full
 full: fmt lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
-		-ldflags '-X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
+		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
+		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
+
+.PHONY: release
+release: fmt $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
+	$Q $(GO) build \
+		-tags release \
+		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 # Tools
@@ -125,6 +133,10 @@ run: all ; $(info $(M) running $(PACKAGE)...) @ ## Run the latest build
 
 %:
 	@:
+
+.PHONY: put
+put: all ; $(info $(M) exporting $(PACKAGE) to /usr/bin/) @ ## Export the built binary to /usr/bin
+	@cp -f $(BIN)/$(PACKAGE) /usr/bin
 
 .PHONY: help
 help:
