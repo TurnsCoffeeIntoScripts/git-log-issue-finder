@@ -36,6 +36,7 @@ release: fmt $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Buil
 		-tags release \
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
+		upx --brute $(BIN)/$(PACKAGE)
 
 # Tools
 
