@@ -17,14 +17,26 @@ Let's start by looking at the '--help' command:
 ```bash
 $> glif --help
 Usage of glif:
-  -directory string
-        The directory of the git repo
-  -full-history
-        Search the entire git log
-  -since-latest-tag
-        Search only from HEAD to the most recent tag
-  -tickets string
-        Comma-separated list of jira project keys
+    -diff-tags string
+          This parameter takes a specially formatted string: <FROM_TAG>==><TO_TAG>
+                  The '==>' is litteral
+                  The '<FROM_TAG>' and '<TO_TAG>' can have 2 formats:
+                          1- A litteral tag name
+                          2- A string with parameters (see below)
+          Parameters are value declared between the '$(' and ')' litterals. Possible parameters:
+                  LATEST: finds the latest value matching the string
+                  LATEST-N: finds the Nth commit behind the latest value matching the string
+          Examples:
+          --diff-tags="v1.0.0-rc.$(LATEST)==>v1.0.0-rc.$(LATEST-1)"
+    -directory string
+          The directory of the git repo (default "./")
+    -full-history
+          Search the entire git log
+    -since-latest-tag
+          Search only from HEAD to the most recent tag
+    -tickets string
+          Comma-separated list of jira project keys
+
 $> 
 ```
 While the help command does not specify it, it's useful to note that every parameter can specified with one or two hyphen.
@@ -32,24 +44,24 @@ While the help command does not specify it, it's useful to note that every param
 The following example assumes that you are working within the directory of your git repository.  
 The most basic usage requires two (2) parameters; here's an example with the output:
 ```bash
-$> glif --tickets="ABC,XYZ" --directory="."
+$> glif --tickets="ABC,XYZ"
 [ABC-001, ABC-007, XYZ-9246, ABC-045, ABC-0245, XYZ-007]
 $> 
 ```
 The above command is equivalent to this one:
 ```bash
-$> glif --tickets="ABC,XYZ" --directory="." --full-history
+$> glif --tickets="ABC,XYZ" --directory="./" --full-history
 ```
 Now let's assume that a tag was made (1.0.0 for example). Following this tag a new feature (XYZ-999) was commited. If you run
 the command but with the --since-latest-tag flags, here's the output you could expect:
 ```bash
-$> glif --tickets="ABC,XYZ" --directory="." --since-latest-tag
+$> glif --tickets="ABC,XYZ" --since-latest-tag
 [XYZ-999]
 $>
 ```
 Running the command with --full-history will now give you the previous result with the added 'XYZ-999' feature.
 ```bash
-$> glif --tickets="ABC,XYZ" --directory="." --full-history
+$> glif --tickets="ABC,XYZ" --full-history
 [ABC-001, ABC-007, XYZ-9246, ABC-045, ABC-0245, XYZ-007, XYZ-999]
 $> 
 ```
@@ -80,7 +92,31 @@ To properly configure git-log-issue-finder, it should be done as a task and not 
 Here's what the task's yaml file should look like
 
 ```yml
-/* TODO */
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: turnscoffeeintoscripts/git-log-issue-finder
+    tag: latest
+
+params:
+  TICKETS_FILTER: 'ABC,DEF,PROD,ETC'
+  GIT_REPO_DIRECTORY: name-of-the-git-repo-directory
+  ISSUES_DIRECTORY: name-of-the-directory-for-the-output-of-glif
+  ISSUES_FILE: issues.txt
+  FLAGS ''
+  DIFF_TAGS: ''
+
+inputs:
+  - name: name-of-the-git-repo-directory
+
+outputs:
+  - name: name-of-the-directory-for-the-output-of-glif
+
+run:
+  path: /bin/sh
+  args:
+    - <PATH_TO_SHELL_SCRIPT>
 ```
 The yaml configuration should contain three parameters ('params'). The destination (DESTINATION) parameter should contain
 the name of the actual git repository folder. The tickets filter (TICKETS_FILTER) is a comma-separated list of Jira
@@ -92,7 +128,24 @@ And now here's what the shell script should look like:
 ```bash
 #!/bin/bash
 
-# TODO
+set -e
+
+glifResult=$(glif --tickets="${TICKETS_FILTER}" --directory="${GIT_REPO_DIRECTORY}" --since-latest-tag)
+
+resultFile="${ISSUES_DIRECTORY}/${ISSUES_FILE}"
+
+if [[ -f "${resultFile}" ]]; then
+    rm -f ${resultFile}
+fi
+
+#echo "Since latest tag: "$(glif --tickets="${TICKETS_FILTER}" --directory="${GIT_REPO_DIRECTORY}" --since-latest-tag)
+#echo "Full history: "$(glif --tickets="${TICKETS_FILTER}" --directory="${GIT_REPO_DIRECTORY}" --full-history)
+
+glifResult="AME-3745,AME-3746"
+#glifResult="VIE-980"
+
+echo ${glifResult} >> ${resultFile}
+echo ${glifResult}
 ```
 
 ## <a name="contact" href="contact">Contact</a>

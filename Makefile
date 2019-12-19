@@ -31,7 +31,7 @@ full: fmt lint $(BIN) ; $(info $(M) building executable...) @ ## Build program b
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 .PHONY: release
-release: fmt $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
+release: fmt lint $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
@@ -137,6 +137,10 @@ run: all ; $(info $(M) running $(PACKAGE)...) @ ## Run the latest build
 
 .PHONY: put
 put: all ; $(info $(M) exporting $(PACKAGE) to /usr/bin/) @ ## Export the built binary to /usr/bin
+	@cp -f $(BIN)/$(PACKAGE) /usr/bin
+
+.PHONY: putrelease
+putrelease: release ; $(info $(M) exporting $(PACKAGE) to /usr/bin/) @ ## Export the built release to /usr/bin
 	@cp -f $(BIN)/$(PACKAGE) /usr/bin
 
 .PHONY: help

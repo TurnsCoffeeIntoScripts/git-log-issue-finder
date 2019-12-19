@@ -15,7 +15,7 @@ ENV GOARCH amd64
 ENV GOMOD /app/go.mod
 
 # Launch the make tool on the default target
-RUN make
+RUN make release
 
 FROM alpine:3.10
 
