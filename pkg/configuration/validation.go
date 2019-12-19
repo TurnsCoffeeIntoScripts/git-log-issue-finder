@@ -21,27 +21,40 @@ const (
 // Constants for possible values of the variables
 const (
 	latest = "LATEST"
+	latestMinus = "LATEST-"
 )
 
 // Constants for configuration table in 'ExtractFromToHash'
 const (
 	fromLatest = "fromLatest"
+	fromLatestMinus = "fromLatestMinus"
 
 	toLatest = "toLatest"
 )
 
+// ValidateParam simply validate that the input flag (which a *string) isn't nil or
+// is not set the the string zero value. In either case log.Fatal is used
 func ValidateParam(param *string, msg string) {
 	if param == nil || *param == "" {
 		log.Fatal(msg)
 	}
 }
 
-//
+// ExtractFromToHash will extract both hash of the 'from' commit to the 'to' commit
 // <FROM_TAG>==><TO_TAG>
 // 'TO' must always be after 'FROM'
+// The diffRegex can contain variable or not.
 //
+// ## Without variable
+// Example:
+//		1.0.0-rc.10==>1.0.0-rc.11
+// This will return the hash of the commits associated with the tags rc.10 and rc.11
+//
+// ## With variable
 // Examples:
 // 		- 1.0.0-rc.$(LATEST-1)/==>1.0.0-rc.$(LATEST)
+// If the latest 'rc' tag for version 1.0.0 is 15 then this will return the hash of
+// the commits associated with the tags rc.14 and rc.15
 //
 func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (plumbing.Hash, plumbing.Hash) {
 	if diffRegex == "" {
@@ -60,8 +73,6 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 	from := values[1]
 	to := values[2]
 
-	//var processedFrom, processedTo bool
-
 	// -----------------------------------
 	// Handle variable in 'from' specifier
 	// -----------------------------------
@@ -71,10 +82,14 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 
 		variable := from[idxStart+variableStarterOffset : idxStart+offset]
 
-		switch variable {
-		case latest:
+		variable = strings.TrimSpace(variable)
+
+		if variable == latest {
 			configs[fromLatest] = true
-		default:
+		} else if strings.HasPrefix(variable, latestMinus) {
+			configs[fromLatest] = false
+			configs[fromLatestMinus] = true
+		} else {
 			panic(fmt.Sprintf("Unkown variable %s", variable))
 		}
 	}
