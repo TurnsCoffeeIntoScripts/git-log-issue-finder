@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// FromTagToTag returns every object.Commit found between the two specified commit hash (related to tags or not)
 func FromTagToTag(repo *git.Repository, fromHash, toHash plumbing.Hash) []*object.Commit {
 	// ---------------------------------------------
 	// Extract the log iterator from the 'from' hash

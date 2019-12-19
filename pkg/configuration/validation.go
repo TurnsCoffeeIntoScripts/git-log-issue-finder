@@ -20,13 +20,13 @@ const (
 
 // Constants for possible values of the variables
 const (
-	latest = "LATEST"
+	latest      = "LATEST"
 	latestMinus = "LATEST-"
 )
 
 // Constants for configuration table in 'ExtractFromToHash'
 const (
-	fromLatest = "fromLatest"
+	fromLatest      = "fromLatest"
 	fromLatestMinus = "fromLatestMinus"
 
 	toLatest = "toLatest"
