@@ -7,21 +7,28 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 // Constants for the regex processing of the 'from' and 'to' tags
 const (
-	regex                 = `([a-zA-Z0-9.\-_$()/]+)==>([a-zA-Z0-9.\-_$()/]+)`
-	variableStarter       = "$("
+	regex                 = `([a-zA-Z0-9.\-_@()/]+)==>([a-zA-Z0-9.\-_@()/]+)`
+	variableStarter       = "@("
 	variableStarterOffset = 2
 	variableEnder         = ")"
 )
 
 // Constants for possible values of the variables
 const (
+	first       = "FIRST"
 	latest      = "LATEST"
 	latestMinus = "LATEST-"
+)
+
+// Constant for math operations
+const (
+	minusSign = "-"
 )
 
 // Constants for configuration table in 'ExtractFromToHash'
@@ -67,11 +74,12 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 
 	values := r.FindStringSubmatch(diffRegex)
 	if len(values) != 3 {
-		// panic
+		// panic TODO
 	}
 
 	from := values[1]
 	to := values[2]
+	var variableFrom, variableTo string
 
 	// -----------------------------------
 	// Handle variable in 'from' specifier
@@ -81,16 +89,15 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 		offset := strings.Index(from[idxStart:], variableEnder)
 
 		variable := from[idxStart+variableStarterOffset : idxStart+offset]
+		variableFrom = strings.TrimSpace(variable)
 
-		variable = strings.TrimSpace(variable)
-
-		if variable == latest {
+		if variableFrom == latest {
 			configs[fromLatest] = true
-		} else if strings.HasPrefix(variable, latestMinus) {
+		} else if strings.HasPrefix(variableFrom, latestMinus) {
 			configs[fromLatest] = false
 			configs[fromLatestMinus] = true
 		} else {
-			panic(fmt.Sprintf("Unkown variable %s", variable))
+			panic(fmt.Sprintf("Unkown variable %s", variableFrom))
 		}
 	}
 
@@ -102,18 +109,34 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 		offset := strings.Index(to[idxStart:], variableEnder)
 
 		variable := to[idxStart+variableStarterOffset : idxStart+offset]
+		variableTo = strings.TrimSpace(variable)
 
-		switch variable {
-		case latest:
+		if variableTo == latest {
 			configs[toLatest] = true
-		default:
-			panic(fmt.Sprintf("Unkown variable %s", variable))
+		} else {
+			panic(fmt.Sprintf("Unkown variable %s", variableTo))
 		}
 	}
 
 	// --------------------------------------------
 	// Validate integrity of from v.s. to specifier
 	// --------------------------------------------
+	// TODO
+
+	// -----------------------------------------------
+	// Apply variables to 'from' and 'to' if necessary
+	// -----------------------------------------------
+	// TODO
+	if configs[toLatest] {
+		to = stripVariableMetaChar(to, variableTo)
+		to = getLatest(repo, tags, to)
+	}
+
+	if configs[fromLatestMinus] {
+		from = stripVariableMetaChar(from, variableFrom)
+		offset := extractOffset(variableFrom)
+		from = getLatestWithOffset(repo, tags, from, offset)
+	}
 
 	// --------------------------------------------
 	// Extract iterator of the resulting commit log
@@ -158,4 +181,89 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 	//fmt.Print(commits)
 
 	return hashFrom, hashTo
+}
+
+func stripVariableMetaChar(s, v string) string {
+	s = strings.ReplaceAll(s, v, "")
+	s = strings.ReplaceAll(s, variableStarter, "")
+	s = strings.ReplaceAll(s, variableEnder, "")
+
+	return s
+}
+
+func getLatest(repo *git.Repository, tagsName []string, v string) string {
+	return getLatestWithOffset(repo, tagsName, v, 0)
+}
+
+func extractOffset(v string) int {
+	if strings.Contains(v, minusSign) {
+		offset, err := strconv.Atoi(strings.Split(v, minusSign)[1])
+		if err != nil {
+			return 0
+		}
+
+		return offset
+	}
+
+	return 0
+}
+
+func getLatestWithOffset(repo *git.Repository, tagsName []string, v string, offset int) string {
+	var commitTimeline = make([]*object.Commit, 0)
+	var tagsTimeline = make([]string, 0)
+
+	for _, t := range tagsName {
+		if !strings.Contains(t, v) {
+			continue
+		}
+
+		ref, err := repo.Tag(t)
+		if err != nil {
+			panic("Unknown tag while fetching latest")
+		}
+
+		tag, err := repo.TagObject(ref.Hash())
+		if err != nil {
+			panic("Unable to find tag object while fetching latest")
+		}
+
+		c, err := tag.Commit()
+		if err != nil {
+			panic("Unable to find commit object while fetching latest")
+		}
+
+		if len(commitTimeline) == 0 {
+			commitTimeline = append(commitTimeline, c)
+			tagsTimeline = append(tagsTimeline, t)
+		} else {
+			fixedTimelineLength := len(commitTimeline)
+			for index := 0; index < fixedTimelineLength; index++ {
+				if c.Committer.When.Before(commitTimeline[index].Committer.When) {
+					continue
+				}
+
+				// If we're here, it means that the new commit if after the one at the specified 'index'
+				// Update the commit timeline
+				commitTimeline = append(commitTimeline, nil)
+				copy(commitTimeline[index+1:], commitTimeline[index:]) // Equivalent to a "shift right by one at index"
+				commitTimeline[index] = c // Then insert new value at index to overwrite the previous value that's now at index+1
+
+				// Update the tags timeline
+				tagsTimeline = append(tagsTimeline, "")
+				copy(tagsTimeline[index+1:], tagsTimeline[index:]) // Equivalent to a "shift right by one at index"
+				tagsTimeline[index] = t // Then insert new value at index to overwrite the previous value that's now at index+1
+
+				// Ensure that no more than one insert will be done per loop
+				break
+
+			}
+		}
+	}
+
+	// If the offset specified is too big, then by default we set the offset as 0
+	if 0+offset >= len(tagsTimeline) {
+		offset = 0
+	}
+	
+	return tagsTimeline[0+offset]
 }
