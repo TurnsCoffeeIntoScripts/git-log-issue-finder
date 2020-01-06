@@ -1,4 +1,12 @@
-FROM golang:1.12 AS builder
+FROM golang:1.12-alpine AS builder
+
+# Add the upx tool for the release target of the Makefile and other needed tools
+RUN apk --no-cache add \
+        upx \
+        make \
+        bash \
+        git \
+;
 
 # Copy everything from the git-log-ticket-finder folder to /app in the image
 COPY . /app
