@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// Tickets returns a slice of every ticket (issue) found in the text based on the provided regex
+// Returns false if nothing was found
 func Tickets(text, ticketRegex string) (bool, []string) {
 	regex := "((?:"
 	if ticketRegex == "*" {
