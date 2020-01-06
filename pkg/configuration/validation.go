@@ -21,22 +21,27 @@ const (
 
 // Constants for possible values of the variables
 const (
-	first       = "FIRST"
-	latest      = "LATEST"
-	latestMinus = "LATEST-"
+	first  = "FIRST"
+	latest = "LATEST"
 )
 
 // Constant for math operations
 const (
 	minusSign = "-"
+	plusSign  = "+"
 )
 
 // Constants for configuration table in 'ExtractFromToHash'
 const (
 	fromLatest      = "fromLatest"
 	fromLatestMinus = "fromLatestMinus"
+	fromFirst       = "fromFirst"
+	fromFirstPlus   = "fromFirstPlus"
 
-	toLatest = "toLatest"
+	toLatest      = "toLatest"
+	toLatestMinus = "toLatestMinus"
+	toFirst       = "toFirst"
+	toFirstPlus   = "toFirstPlus"
 )
 
 // ValidateParam simply validate that the input flag (which a *string) isn't nil or
@@ -88,12 +93,22 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 		idxStart := strings.Index(from, variableStarter)
 		offset := strings.Index(from[idxStart:], variableEnder)
 
+		// If the variable is NOT at the end of the specifier then we panic
+		// because it's not a supported format and we don't know how to
+		// properly handle that
+		// The '+1' is to take into account the closing parenthesis after the variable offset
+		if idxStart+offset+1 != len(from) {
+			panic(fmt.Sprintf("Variable was not specified at the end of the 'from' specifier: %s", from))
+		}
+
 		variable := from[idxStart+variableStarterOffset : idxStart+offset]
 		variableFrom = strings.TrimSpace(variable)
 
 		if variableFrom == latest {
 			configs[fromLatest] = true
-		} else if strings.HasPrefix(variableFrom, latestMinus) {
+		} else if variableFrom == first {
+			configs[fromFirst] = true
+		} else if strings.HasPrefix(variableFrom, latest) && strings.Contains(variableFrom, minusSign) {
 			configs[fromLatest] = false
 			configs[fromLatestMinus] = true
 		} else {
@@ -108,11 +123,22 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 		idxStart := strings.Index(to, variableStarter)
 		offset := strings.Index(to[idxStart:], variableEnder)
 
+		// If the variable is NOT at the end of the specifier then we panic
+		// because it's not a supported format and we don't know how to
+		// properly handle that
+		// The '+1' is to take into account the closing parenthesis after the variable offset
+		if idxStart+offset+1 != len(to) {
+			panic(fmt.Sprintf("Variable was not specified at the end of the 'from' specifier: %s", to))
+		}
+
 		variable := to[idxStart+variableStarterOffset : idxStart+offset]
 		variableTo = strings.TrimSpace(variable)
 
 		if variableTo == latest {
 			configs[toLatest] = true
+		} else if strings.HasPrefix(variableTo, latest) && strings.Contains(variableTo, minusSign) {
+			configs[toLatest] = false
+			configs[toLatestMinus] = true
 		} else {
 			panic(fmt.Sprintf("Unkown variable %s", variableTo))
 		}
@@ -121,21 +147,50 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 	// --------------------------------------------
 	// Validate integrity of from v.s. to specifier
 	// --------------------------------------------
-	// TODO
+	// TODO add validation for first and firstPlus
+	if configs[fromLatest] && configs[toLatestMinus] {
+		// This is an invalid range. What's been specified is we want the range starting from the latest value
+		// to a latest minus an 'offset' value.
+		log.Panic("Invalid diff range")
+	}
+
+	if configs[fromLatest] && configs[toLatest] {
+		// This is technically not an invalid range, but will return nothing since we'd be returning the diff between
+		// two commits (tags) that are actually the same
+		log.Panic("Invalid diff range")
+	}
+
+	if configs[fromLatestMinus] && configs[toLatestMinus] {
+		// This *MIGHT* be an invalid range. To be sure, we need to validate both offset values that were specified
+		offsetFrom := extractOffset(variableFrom)
+		offsetTo := extractOffset(variableTo)
+
+		if offsetFrom <= offsetTo {
+			// The 'from' specified is after the 'to' specified, therefore creating an invalid range
+			log.Panic("Invalid diff range")
+		}
+	}
 
 	// -----------------------------------------------
 	// Apply variables to 'from' and 'to' if necessary
 	// -----------------------------------------------
-	// TODO
+	// TODO apply first and firstPlus
+	to = stripVariableMetaChar(to, variableTo)
 	if configs[toLatest] {
-		to = stripVariableMetaChar(to, variableTo)
 		to = getLatest(repo, tags, to)
+	} else if configs[toLatestMinus] {
+		offset := extractOffset(variableTo)
+		to = getTagWithOffset(repo, tags, to, offset, false)
 	}
 
-	if configs[fromLatestMinus] {
-		from = stripVariableMetaChar(from, variableFrom)
+	from = stripVariableMetaChar(from, variableFrom)
+	if configs[fromLatest] {
+		from = getLatest(repo, tags, from)
+	} else if configs[fromLatestMinus] {
 		offset := extractOffset(variableFrom)
-		from = getLatestWithOffset(repo, tags, from, offset)
+		from = getTagWithOffset(repo, tags, from, offset, false)
+	} else if configs[fromFirst] {
+		from = getFirst(repo, tags, from)
 	}
 
 	// --------------------------------------------
@@ -178,8 +233,6 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 		return nil
 	})
 
-	//fmt.Print(commits)
-
 	return hashFrom, hashTo
 }
 
@@ -189,10 +242,6 @@ func stripVariableMetaChar(s, v string) string {
 	s = strings.ReplaceAll(s, variableEnder, "")
 
 	return s
-}
-
-func getLatest(repo *git.Repository, tagsName []string, v string) string {
-	return getLatestWithOffset(repo, tagsName, v, 0)
 }
 
 func extractOffset(v string) int {
@@ -208,7 +257,15 @@ func extractOffset(v string) int {
 	return 0
 }
 
-func getLatestWithOffset(repo *git.Repository, tagsName []string, v string, offset int) string {
+func getFirst(repo *git.Repository, tagsName []string, v string) string {
+	return getTagWithOffset(repo, tagsName, v, 0, true)
+}
+
+func getLatest(repo *git.Repository, tagsName []string, v string) string {
+	return getTagWithOffset(repo, tagsName, v, 0, false)
+}
+
+func getTagWithOffset(repo *git.Repository, tagsName []string, v string, offset int, reversed bool) string {
 	var commitTimeline = make([]*object.Commit, 0)
 	var tagsTimeline = make([]string, 0)
 
@@ -239,19 +296,27 @@ func getLatestWithOffset(repo *git.Repository, tagsName []string, v string, offs
 			fixedTimelineLength := len(commitTimeline)
 			for index := 0; index < fixedTimelineLength; index++ {
 				if c.Committer.When.Before(commitTimeline[index].Committer.When) {
-					continue
+					if index == fixedTimelineLength-1 {
+						commitTimeline = append(commitTimeline, c)
+						tagsTimeline = append(tagsTimeline, t)
+
+						// Break after the append so we don't double add a value in the timeline
+						break
+					} else {
+						continue
+					}
 				}
 
 				// If we're here, it means that the new commit if after the one at the specified 'index'
 				// Update the commit timeline
 				commitTimeline = append(commitTimeline, nil)
 				copy(commitTimeline[index+1:], commitTimeline[index:]) // Equivalent to a "shift right by one at index"
-				commitTimeline[index] = c // Then insert new value at index to overwrite the previous value that's now at index+1
+				commitTimeline[index] = c                              // Then insert new value at index to overwrite the previous value that's now at index+1
 
 				// Update the tags timeline
 				tagsTimeline = append(tagsTimeline, "")
 				copy(tagsTimeline[index+1:], tagsTimeline[index:]) // Equivalent to a "shift right by one at index"
-				tagsTimeline[index] = t // Then insert new value at index to overwrite the previous value that's now at index+1
+				tagsTimeline[index] = t                            // Then insert new value at index to overwrite the previous value that's now at index+1
 
 				// Ensure that no more than one insert will be done per loop
 				break
@@ -264,6 +329,13 @@ func getLatestWithOffset(repo *git.Repository, tagsName []string, v string, offs
 	if 0+offset >= len(tagsTimeline) {
 		offset = 0
 	}
-	
+
+	// If the reversed flag was set to true, that means we are looking at the beginning of the timeline first (e.g. The oldest ones)
+	// Used with 'FIRST'
+	if reversed {
+		return tagsTimeline[(len(tagsTimeline)-1)-offset]
+	}
+
+	// Otherwise we look at the end first to get the latest value with the specified offset
 	return tagsTimeline[0+offset]
 }

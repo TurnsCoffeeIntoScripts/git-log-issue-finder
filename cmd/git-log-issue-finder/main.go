@@ -22,11 +22,11 @@ var diffTagDesc = "This parameter takes a specially formatted string: <FROM_TAG>
 	"\tThe '<FROM_TAG>' and '<TO_TAG>' can have 2 formats:\n" +
 	"\t\t1- A litteral tag name\n" +
 	"\t\t2- A string with parameters (see below)\n" +
-	"Parameters are values declared between the '$(' and ')' litterals. Possible parameters:\n" +
+	"Parameters are values declared between the '@(' and ')' litterals. Possible parameters:\n" +
 	"\tLATEST: finds the latest value matching the string\n" +
 	"\tLATEST-N: finds the Nth commit behind the latest value matching the string\n" +
 	"Examples:\n" +
-	"--diff-tags=\"v1.0.0-rc.$(LATEST)==>v1.0.0-rc.$(LATEST-1)\"\n" +
+	"--diff-tags=\"v1.0.0-rc.@(LATEST)==>v1.0.0-rc.@(LATEST-1)\"\n" +
 	"\tThis will return the issues found between the latest RC of version 1.0.0 and the RC before that one"
 
 func main() {
@@ -38,6 +38,7 @@ func main() {
 	// Flags
 	fullHistory := flag.Bool("full-history", false, "Search the entire git log")
 	sinceLatestTag := flag.Bool("since-latest-tag", false, "Search only from HEAD to the most recent tag")
+	forceFetch := flag.Bool("force-fetch", false, "Force a 'git fetch' operation on the specified repository")
 
 	flag.Parse()
 
@@ -55,6 +56,13 @@ func main() {
 	if err != nil {
 		fmt.Print(err.Error())
 		log.Fatal("an error occured while instantiating a new repository object")
+	}
+
+	if forceFetch != nil && *forceFetch {
+		if fetchErr := repo.Fetch(&git.FetchOptions{}); fetchErr != nil {
+			fmt.Println(fetchErr.Error())
+			log.Print("an error occured while trying to fetch repo. Continuing without fetching...")
+		}
 	}
 
 	ref, err := repo.Head()

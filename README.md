@@ -130,22 +130,7 @@ And now here's what the shell script should look like:
 
 set -e
 
-glifResult=$(glif --tickets="${TICKETS_FILTER}" --directory="${GIT_REPO_DIRECTORY}" --since-latest-tag)
-
-resultFile="${ISSUES_DIRECTORY}/${ISSUES_FILE}"
-
-if [[ -f "${resultFile}" ]]; then
-    rm -f ${resultFile}
-fi
-
-#echo "Since latest tag: "$(glif --tickets="${TICKETS_FILTER}" --directory="${GIT_REPO_DIRECTORY}" --since-latest-tag)
-#echo "Full history: "$(glif --tickets="${TICKETS_FILTER}" --directory="${GIT_REPO_DIRECTORY}" --full-history)
-
-glifResult="AME-3745,AME-3746"
-#glifResult="VIE-980"
-
-echo ${glifResult} >> ${resultFile}
-echo ${glifResult}
+# TODO
 ```
 
 ## <a name="contact" href="contact">Contact</a>
