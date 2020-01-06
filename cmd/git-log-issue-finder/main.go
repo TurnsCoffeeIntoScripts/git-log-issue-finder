@@ -40,6 +40,10 @@ func main() {
 	sinceLatestTag := flag.Bool("since-latest-tag", false, "Search only from HEAD to the most recent tag")
 	forceFetch := flag.Bool("force-fetch", false, "Force a 'git fetch' operation on the specified repository")
 
+	// Flags
+	fullHistory := flag.Bool("full-history", false, "Search the entire git log")
+	sinceLatestTag := flag.Bool("since-latest-tag", false, "Search only from HEAD to the most recent tag")
+
 	flag.Parse()
 
 	// Validating mandatory params
@@ -88,12 +92,22 @@ func main() {
 			fmt.Print(err.Error())
 			log.Fatal("an error occured while retrieving the commit history")
 		}
+	} else if *fullHistory {
+		iter, err := repo.Log(&git.LogOptions{From: ref.Hash()})
+		if err != nil {
+			fmt.Print(err.Error())
+			log.Fatal("an error occured while retrieving the commit history")
+		}
 
 		err = iter.ForEach(func(c *object.Commit) error {
 			if presentInMessage, ticket := find.Tickets(c.Message, *ticketRegex); presentInMessage {
 				TicketSlice = append(TicketSlice, ticket...)
 			}
 
+		err = iter.ForEach(func(c *object.Commit) error {
+			if presentInMessage, ticket := find.Tickets(c.Message, *ticketRegex); presentInMessage {
+				TicketSlice = append(TicketSlice, ticket...)
+			}
 			return nil
 		})
 	}
