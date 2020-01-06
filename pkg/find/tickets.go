@@ -7,7 +7,11 @@ import (
 
 func Tickets(text, ticketRegex string) (bool, []string) {
 	regex := "((?:"
-	regex += strings.ReplaceAll(ticketRegex, ",", "|")
+	if ticketRegex == "*" {
+		regex += "[a-zA-Z0-9]+"
+	} else {
+		regex += strings.ReplaceAll(ticketRegex, ",", "|")
+	}
 	regex += ")-[0-9]+)"
 
 	r, _ := regexp.Compile(regex)
