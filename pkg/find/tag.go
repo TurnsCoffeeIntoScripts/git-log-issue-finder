@@ -7,6 +7,7 @@ import (
 	"log"
 )
 
+// LatestTag returns the Hash value of the lastest Tag found based on specified iterator
 func LatestTag(iter *object.TagIter, hash plumbing.Hash, err error) plumbing.Hash {
 	if err != nil {
 		fmt.Print(err.Error())
