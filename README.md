@@ -3,7 +3,7 @@
 This small program is used to extract a list of Jira issues from the output of a git log. This require an already checked-out
 repository. 
 
-Version: 1.5.0
+Version: 1.5.1
 
 ## Content:
 1. [Usage](#usage)
