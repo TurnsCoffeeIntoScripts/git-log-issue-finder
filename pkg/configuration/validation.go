@@ -23,6 +23,7 @@ const (
 const (
 	first  = "FIRST"
 	latest = "LATEST"
+	head   = "HEAD"
 )
 
 // Constant for math operations
@@ -38,6 +39,7 @@ const (
 	fromFirst       = "fromFirst"
 	fromFirstPlus   = "fromFirstPlus"
 
+	toHead        = "toHead"
 	toLatest      = "toLatest"
 	toLatestMinus = "toLatestMinus"
 	toFirst       = "toFirst"
@@ -64,7 +66,7 @@ func ValidateParam(param *string, msg string) {
 //
 // ## With variable
 // Examples:
-// 		- 1.0.0-rc.$(LATEST-1)/==>1.0.0-rc.$(LATEST)
+// 		- 1.0.0-rc.@(LATEST-1)/==>1.0.0-rc.@(LATEST)
 // If the latest 'rc' tag for version 1.0.0 is 15 then this will return the hash of
 // the commits associated with the tags rc.14 and rc.15
 //
@@ -134,7 +136,9 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 		variable := to[idxStart+variableStarterOffset : idxStart+offset]
 		variableTo = strings.TrimSpace(variable)
 
-		if variableTo == latest {
+		if variableTo == head {
+			configs[toHead] = true
+		} else if variableTo == latest {
 			configs[toLatest] = true
 		} else if strings.HasPrefix(variableTo, latest) && strings.Contains(variableTo, minusSign) {
 			configs[toLatest] = false
@@ -197,7 +201,14 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 	// Extract iterator of the resulting commit log
 	// --------------------------------------------
 	refFrom, errFrom := repo.Tag(from)
-	refTo, errTo := repo.Tag(to)
+
+	var refTo *plumbing.Reference
+	var errTo error
+	if configs[toHead] {
+		refTo, errTo = repo.Head()
+	} else {
+		refTo, errTo = repo.Tag(to)
+	}
 
 	if errFrom != nil || errTo != nil {
 		panic("Unknown tag(s)")
@@ -206,7 +217,7 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 	tagFrom, errFrom := repo.TagObject(refFrom.Hash())
 	tagTo, errTo := repo.TagObject(refTo.Hash())
 
-	if errFrom != nil || errTo != nil {
+	if errFrom != nil || (errTo != nil && !configs[toHead]) {
 		panic("Unable to find tag(s) object(s)")
 	}
 
@@ -218,15 +229,21 @@ func ExtractFromToHash(repo *git.Repository, tags []string, diffRegex string) (p
 	i, _ := repo.Log(&git.LogOptions{From: headRef.Hash()})
 
 	_ = i.ForEach(func(commit *object.Commit) error {
-		if commitFrom, err := tagFrom.Commit(); err == nil {
-			if commit.Hash == commitFrom.Hash && hashFrom == plumbing.ZeroHash {
-				hashFrom = commit.Hash
+		if hashFrom == plumbing.ZeroHash {
+			if commitFrom, err := tagFrom.Commit(); err == nil {
+				if commit.Hash == commitFrom.Hash {
+					hashFrom = commit.Hash
+				}
 			}
 		}
 
-		if commitTo, err := tagTo.Commit(); err == nil {
-			if commit.Hash == commitTo.Hash && hashTo == plumbing.ZeroHash {
-				hashTo = commit.Hash
+		if hashTo == plumbing.ZeroHash {
+			if tagTo == nil && configs[toHead] {
+				hashTo = refTo.Hash()
+			} else if commitTo, err := tagTo.Commit(); err == nil {
+				if commit.Hash == commitTo.Hash {
+					hashTo = commit.Hash
+				}
 			}
 		}
 
