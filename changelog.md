@@ -5,6 +5,8 @@ The format of this file is based on [Keep a Changelog](https://keepachangelog.co
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] 
+
+## [1.5.0] - 2020-01-22
 ### Added
 - Added the 'HEAD' keyword so the 'diff-tags' command can read the git HEAD
 
