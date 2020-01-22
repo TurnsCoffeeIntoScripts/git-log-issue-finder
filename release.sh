@@ -51,7 +51,7 @@ git push
 echo "=================================================================="
 echo -e $GREEN"Building Docker image ($1) with following build arguments:"$NO_COLOR
 echo -e $GREEN"\tVERSION=$1"$NO_COLOR
-docker build -t turnscoffeeintoscripts/jira-api-issue-resource:$1 \
+docker build -t turnscoffeeintoscripts/git-log-issue-finder:$1 \
     --build-arg VERSION=$1 \
     .
 
@@ -59,7 +59,7 @@ if [[ $? -eq "0" ]]; then
     # Pushing docker image
     echo "=================================================================="
     echo -e $GREEN"Pushing Docker image ($1) to docker hub"$NO_COLOR
-    docker push turnscoffeeintoscripts/jira-api-issue-resource:$1
+    docker push turnscoffeeintoscripts/git-log-issue-finder:$1
 else
     exit 1
 fi
