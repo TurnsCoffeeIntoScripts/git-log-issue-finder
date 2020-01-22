@@ -3,6 +3,8 @@
 This small program is used to extract a list of Jira issues from the output of a git log. This require an already checked-out
 repository. 
 
+Version: 1.4.0
+
 ## Content:
 1. [Usage](#usage)
 2. [Pipeline Configuration](#pipeline_configuration)
@@ -23,11 +25,11 @@ Usage of glif:
                   The '<FROM_TAG>' and '<TO_TAG>' can have 2 formats:
                           1- A litteral tag name
                           2- A string with parameters (see below)
-          Parameters are value declared between the '$(' and ')' litterals. Possible parameters:
+          Parameters are value declared between the '@(' and ')' litterals. Possible parameters:
                   LATEST: finds the latest value matching the string
                   LATEST-N: finds the Nth commit behind the latest value matching the string
           Examples:
-          --diff-tags="v1.0.0-rc.$(LATEST)==>v1.0.0-rc.$(LATEST-1)"
+          --diff-tags="v1.0.0-rc.@(LATEST-1)==>v1.0.0-rc.@(LATEST)"
     -directory string
           The directory of the git repo (default "./")
     -full-history
