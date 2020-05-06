@@ -19,6 +19,7 @@ package configuration
 import (
 	"flag"
 	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/helpers"
+	"io/ioutil"
 	"reflect"
 )
 
@@ -42,6 +43,7 @@ const (
 	scriptDescription     = "The glif script file to execute"
 	ticketsDefault        = "*"
 	ticketsDescription    = "The Jira tickets regex used to search the repo's log"
+	replDescription       = "Enter the Read-Eval-Print-Loop"
 	forceFetchDefault     = false
 	forceFetchDescription = "Force a 'git fetch' operation on the specified repository"
 )
@@ -56,6 +58,8 @@ type GlifParameters struct {
 
 	Flags   GlifFlags
 	Scripts GlifPreConfiguredScripts
+
+	UserSpecifiedScript string
 }
 
 // GlifFlags contains the various boolean flags (actual command line flags and not parameters) used by glif.
@@ -70,6 +74,7 @@ type GlifPreConfiguredScripts struct {
 	UseDiffLatestSemverWithLatestBuilds *bool
 	UseDiffLatestSemverWithLatestRCs    *bool
 	UseDiffLatestSemver                 *bool
+	UseUserSpecifiedScript              *bool
 }
 
 // Parse encapsulate the function calls to the Go flag package. It also internally runs an application-related validation.
@@ -77,7 +82,7 @@ func (params *GlifParameters) Parse(forceRepl bool) bool {
 	params.Script = flag.String(script, scriptDefault, scriptDescription)
 	params.Tickets = flag.String(tickets, ticketsDefault, ticketsDescription)
 
-	params.Flags.REPL = flag.Bool(repl, forceRepl, "")
+	params.Flags.REPL = flag.Bool(repl, forceRepl, replDescription)
 	params.Flags.ForceFetch = flag.Bool(forceFetch, forceFetchDefault, forceFetchDescription)
 
 	params.Scripts.UseDiffLatestSemverWithLatestBuilds = flag.Bool(diffLatestSemverWithLatestBuilds, false, "script.DiffLatestSemverWithLatestBuilds")
@@ -103,7 +108,6 @@ func (params *GlifParameters) validate() bool {
 	if helpers.IsStringPtrNilOrEmtpy(params.Script) {
 		// No script was specified, before failing the validation we need to check if any of the preconfigured
 		// script were declared
-
 		count := 0
 		v := reflect.ValueOf(params.Scripts)
 
@@ -119,9 +123,14 @@ func (params *GlifParameters) validate() bool {
 		return count == 1
 	}
 
-	// Process 'from'
-	//tags.ProcessDiffTag(*param.FromTags, param.Flags)
-	//tags.ProcessDiffTag(to)
+	buffer, err := ioutil.ReadFile(*params.Script)
+	if err != nil {
+		return false
+	}
+
+	params.UserSpecifiedScript = string(buffer)
+	forceTrue := true
+	params.Scripts.UseUserSpecifiedScript = &forceTrue
 
 	return true
 }

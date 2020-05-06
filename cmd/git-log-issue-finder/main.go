@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/configuration"
 	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/helpers"
@@ -45,8 +46,10 @@ func start(glifParam configuration.GlifParameters) error {
 		input = &script.DiffLatestSemverWithLatestRCs
 	} else if helpers.IsBoolPtrTrue(glifParam.Scripts.UseDiffLatestSemver) {
 		input = &script.DiffLatestSemver
+	} else if helpers.IsBoolPtrTrue(glifParam.Scripts.UseUserSpecifiedScript) {
+		input = &glifParam.UserSpecifiedScript
 	} else {
-		input = glifParam.Script
+		return errors.New("unknown scripting mode")
 	}
 
 	l := lexer.New(*input)
