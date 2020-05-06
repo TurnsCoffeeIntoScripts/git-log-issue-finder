@@ -16,6 +16,7 @@ import (
 const (
 	InitialPrompt = "-- Type 'exit' to close the repl.\n----------\n"
 	Prompt        = ">> "
+	trace         = true
 )
 
 // CatBug is the "picture" displayed when an error has been detected by either the parse or the evaluator
@@ -57,7 +58,7 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		l := lexer.New(line)
-		p := parser.NewWithOptions(l, false)
+		p := parser.NewWithOptions(l, trace)
 
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {

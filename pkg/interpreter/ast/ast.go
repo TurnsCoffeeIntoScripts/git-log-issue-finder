@@ -205,11 +205,14 @@ func (ls *SetStatement) statementNode() {
 func (ls *SetStatement) String() string {
 	var out bytes.Buffer
 
+	out.WriteString(ls.TokenLiteral() + " ")
 	out.WriteString(ls.Name.String())
-	out.WriteString(" = ")
+	out.WriteString(" ")
 
 	if ls.Value != nil {
+		out.WriteString("\"")
 		out.WriteString(ls.Value.String())
+		out.WriteString("\"")
 	}
 
 	out.WriteString(";")

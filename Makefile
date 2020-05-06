@@ -79,7 +79,7 @@ test-verbose: ARGS=-v            ## Run tests in verbose mode with coverage repo
 test-race:    ARGS=-race         ## Run tests with race detector
 $(TEST_TARGETS): NAME=$(MAKECMDGOALS:test-%=%)
 $(TEST_TARGETS): test
-check test tests: fmt lint ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests
+check test tests: fmt ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests
 	$Q $(GO) test -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
 
 test-xml: fmt lint | $(GO2XUNIT) ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests with xUnit output
@@ -93,7 +93,8 @@ COVERAGE_XML = $(COVERAGE_DIR)/coverage.xml
 COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
 test-coverage-tools: | $(GOCOVMERGE) $(GOCOV) $(GOCOVXML)
-test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage_$(shell date -u +"%Y-%m-%dT%H-%M-%S")
+#test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage_$(shell date +"%Y%m%d_%H%M%S%Z")
+test-coverage: COVERAGE_DIR := $(CURDIR)/test_coverage")
 test-coverage: fmt test-coverage-tools ; $(info $(M) running coverage tests...) @ ## Run coverage tests
 	$Q mkdir -p $(COVERAGE_DIR)/coverage
 	$Q for pkg in $(TESTPKGS); do \
