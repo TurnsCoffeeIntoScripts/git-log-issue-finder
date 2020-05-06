@@ -1,3 +1,4 @@
+// Package script contains the preedefined scripts that are binded to the input flags
 package script
 
 // DiffLatestSemverWithLatestBuilds is a predefined script

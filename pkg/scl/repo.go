@@ -81,26 +81,15 @@ func (glifRepo *GlifRepo) FetchAllMatchingTags(regexString string) bool {
 			if r.MatchString(reference.Name().String()) {
 				fmt.Printf("Matched tag name (tagged object): %s (%s)\n", reference.Name(), tagObj.Name)
 				glifRepo.matchingTags[reference.Name().String()] = tagObj
-			} else {
+			} /* else {
 				fmt.Printf("Not matched tag name (tagged object): %s (%s)\n", reference.Name(), tagObj.Name)
-			}
+			}*/
 		} else {
 			fmt.Printf("No tag object found for: %s (%s)\n", reference.Name(), reference.Target())
 		}
 
 		return nil
 	})
-
-	/*_ = iter.ForEach(func(tag *object.Tag) error {
-		if r.MatchString(tag.Name) {
-			fmt.Println("Matched: " + tag.Name)
-			glifRepo.matchingTags[tag.Name] = tag
-		} else {
-			fmt.Println("Not matched: " + tag.Name)
-		}
-
-		return nil
-	})*/
 
 	for name, reference := range glifRepo.matchingTags {
 		reference.Name = name
