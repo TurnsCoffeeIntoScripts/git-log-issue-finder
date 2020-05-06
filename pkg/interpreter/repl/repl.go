@@ -16,7 +16,7 @@ import (
 const (
 	InitialPrompt = "-- Type 'exit' to close the repl.\n----------\n"
 	Prompt        = ">> "
-	trace         = true
+	trace         = false
 )
 
 // CatBug is the "picture" displayed when an error has been detected by either the parse or the evaluator
