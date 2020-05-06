@@ -1,0 +1,2667 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/ast/ast.go (11.6%)</option>
+				
+				<option value="file1">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/evaluator/builtins.go (20.0%)</option>
+				
+				<option value="file2">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/evaluator/evaluator.go (88.8%)</option>
+				
+				<option value="file3">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/lexer/lexer.go (97.4%)</option>
+				
+				<option value="file4">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/array.go (0.0%)</option>
+				
+				<option value="file5">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/boolean.go (0.0%)</option>
+				
+				<option value="file6">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/builtin.go (0.0%)</option>
+				
+				<option value="file7">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/environment.go (0.0%)</option>
+				
+				<option value="file8">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/error.go (0.0%)</option>
+				
+				<option value="file9">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/function.go (0.0%)</option>
+				
+				<option value="file10">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/hash.go (16.7%)</option>
+				
+				<option value="file11">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/integer.go (0.0%)</option>
+				
+				<option value="file12">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/null.go (0.0%)</option>
+				
+				<option value="file13">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/repo.go (0.0%)</option>
+				
+				<option value="file14">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/return.go (0.0%)</option>
+				
+				<option value="file15">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/string.go (50.0%)</option>
+				
+				<option value="file16">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object/tag.go (0.0%)</option>
+				
+				<option value="file17">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go (79.2%)</option>
+				
+				<option value="file18">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// Package ast defines the various building blocks of the interpreter's abstract syntax tree (ast)
+package ast
+
+import (
+        "bytes"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/gitoken"
+        "strings"
+)
+
+// Node is an interface that needs to be implemented by every element that the AST will contain
+type Node interface {
+        TokenLiteral() string
+        String() string
+}
+
+// Statement is an interface enclosing a node and to be implemented by the language's statements
+type Statement interface {
+        Node
+        statementNode()
+}
+
+// Expression is an interface enclosing a node and to be implemented by the language's expression
+type Expression interface {
+        Node
+        expressionNode()
+}
+
+// Program is a collection (slice) of statements that represents the input program
+type Program struct {
+        Statements []Statement
+}
+
+// Identifier is an identifier node
+type Identifier struct {
+        Token gitoken.Token
+        Value string
+}
+
+// LetStatement is an ast node representing a statement of the form: 'let &lt;IDENT&gt; = &lt;EXPR&gt;
+type LetStatement struct {
+        Token gitoken.Token
+        Name  *Identifier
+        Value Expression
+}
+
+// SetStatement is an ast node representing a statement of the form: 'set &lt;KEYWORD&gt; &lt;LITTERAL&gt;
+type SetStatement struct {
+        Token gitoken.Token
+        Name  *Identifier
+        Value Expression
+}
+
+// ReturnStatement is an ast node representing a statement of the form: 'return &lt;EXPR&gt;'
+type ReturnStatement struct {
+        Token       gitoken.Token
+        ReturnValue Expression
+}
+
+// ExpressionStatement is an ast node representing a statement of the form: '&lt;EXPR&gt;'
+type ExpressionStatement struct {
+        Token      gitoken.Token
+        Expression Expression
+}
+
+// BlockStatement is an ast node representing a collection of statement and an initiating token
+type BlockStatement struct {
+        Token      gitoken.Token
+        Statements []Statement
+}
+
+// FunctionLiteral is an ast node representing a function of the form: 'fn(&lt;PARAMS&gt;) ast.BlockStatement'
+type FunctionLiteral struct {
+        Token      gitoken.Token
+        Parameters []*Identifier
+        Body       *BlockStatement
+}
+
+// ArrayLiteral is an ast node representing an array of the form: '[&lt;ELEM1&gt;, &lt;ELEME2&gt;, ..., &lt;ELEMn&gt;]'
+type ArrayLiteral struct {
+        Token    gitoken.Token
+        Elements []Expression
+}
+
+// HashLiteral is an ast node representing a hash of the form: '{&lt;KEY1&gt;: &lt;VAL1&gt;, &lt;KEY2&gt;: &lt;VAL2&gt;, ..., &lt;KEYn&gt;: &lt;VALn&gt;}'
+type HashLiteral struct {
+        Token gitoken.Token
+        Pairs map[Expression]Expression
+}
+
+// IntegerLiteral is an ast node representing an integer value
+type IntegerLiteral struct {
+        Token gitoken.Token
+        Value int64
+}
+
+// StringLiteral is an ast node representing a string value
+type StringLiteral struct {
+        Token gitoken.Token
+        Value string
+}
+
+// Boolean is an ast node representing a boolean value
+type Boolean struct {
+        Token gitoken.Token
+        Value bool
+}
+
+// PrefixExpression is an ast node representing an expression of the form: '&lt;OPERATOR&gt;&lt;EXPR&gt;'
+type PrefixExpression struct {
+        Token    gitoken.Token
+        Operator string
+        Right    Expression
+}
+
+// InfixExpression is an ast node representing an expression of the form: '&lt;EXPR&gt; &lt;OPERATOR&gt; &lt;EXPR&gt;'
+type InfixExpression struct {
+        Token    gitoken.Token
+        Left     Expression
+        Operator string
+        Right    Expression
+}
+
+// IfExpression is an ast node representing an expression of the form: 'if(&lt;EXPR&gt;) ast.BlockStatement else ast.BlockStatement '
+type IfExpression struct {
+        Token       gitoken.Token
+        Condition   Expression
+        Consequence *BlockStatement
+        Alternative *BlockStatement
+}
+
+// CallExpression is an ast node representing an expression of the form: 'FNIDENT(PARAMS)'
+type CallExpression struct {
+        Token     gitoken.Token
+        Function  Expression
+        Arguments []Expression
+}
+
+// IndexExpression is an ast node representing an expression of the form: 'ARRAY[&lt;EXPR&gt;]'
+type IndexExpression struct {
+        Token gitoken.Token
+        Left  Expression
+        Index Expression
+}
+
+// TokenLiteral returns the literal string of the token
+func (p *Program) TokenLiteral() string <span class="cov0" title="0">{
+        if len(p.Statements) &gt; 0 </span><span class="cov0" title="0">{
+                return p.Statements[0].TokenLiteral()
+        }</span>
+
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (p *Program) String() string <span class="cov1" title="1">{
+        var out bytes.Buffer
+
+        for _, s := range p.Statements </span><span class="cov1" title="1">{
+                out.WriteString(s.String())
+        }</span>
+
+        <span class="cov1" title="1">return out.String()</span>
+}
+
+func (i *Identifier) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (i *Identifier) TokenLiteral() string <span class="cov0" title="0">{
+        return i.Token.Literal
+}</span>
+
+func (i *Identifier) String() string <span class="cov10" title="2">{
+        return i.Value
+}</span>
+
+func (ls *LetStatement) statementNode() {<span class="cov0" title="0">
+
+}</span>
+
+func (ls *LetStatement) String() string <span class="cov1" title="1">{
+        var out bytes.Buffer
+
+        out.WriteString(ls.TokenLiteral() + " ")
+        out.WriteString(ls.Name.String())
+        out.WriteString(" = ")
+
+        if ls.Value != nil </span><span class="cov1" title="1">{
+                out.WriteString(ls.Value.String())
+        }</span>
+
+        <span class="cov1" title="1">out.WriteString(";")
+        return out.String()</span>
+}
+
+// TokenLiteral returns the literal string of the token
+func (ls *SetStatement) TokenLiteral() string <span class="cov0" title="0">{
+        return ls.Token.Literal
+}</span>
+
+func (ls *SetStatement) statementNode() {<span class="cov0" title="0">
+
+}</span>
+
+func (ls *SetStatement) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        out.WriteString(ls.Name.String())
+        out.WriteString(" = ")
+
+        if ls.Value != nil </span><span class="cov0" title="0">{
+                out.WriteString(ls.Value.String())
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString(";")
+        return out.String()</span>
+}
+
+// TokenLiteral returns the literal string of the token
+func (ls *LetStatement) TokenLiteral() string <span class="cov1" title="1">{
+        return ls.Token.Literal
+}</span>
+
+func (rs *ReturnStatement) statementNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (rs *ReturnStatement) TokenLiteral() string <span class="cov0" title="0">{
+        return rs.Token.Literal
+}</span>
+
+func (rs *ReturnStatement) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        out.WriteString(rs.TokenLiteral() + " ")
+
+        if rs.ReturnValue != nil </span><span class="cov0" title="0">{
+                out.WriteString(rs.ReturnValue.String())
+        }</span>
+        <span class="cov0" title="0">out.WriteString(";")
+        return out.String()</span>
+}
+
+func (es *ExpressionStatement) statementNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (es *ExpressionStatement) TokenLiteral() string <span class="cov0" title="0">{
+        return es.Token.Literal
+}</span>
+
+func (es *ExpressionStatement) String() string <span class="cov0" title="0">{
+        if es.Expression != nil </span><span class="cov0" title="0">{
+                return es.Expression.String()
+        }</span>
+
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (bs *BlockStatement) statementNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (bs *BlockStatement) TokenLiteral() string <span class="cov0" title="0">{
+        return bs.Token.Literal
+}</span>
+
+func (bs *BlockStatement) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        for _, s := range bs.Statements </span><span class="cov0" title="0">{
+                out.WriteString(s.String())
+        }</span>
+
+        <span class="cov0" title="0">return out.String()</span>
+}
+
+func (fl *FunctionLiteral) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (fl *FunctionLiteral) TokenLiteral() string <span class="cov0" title="0">{
+        return fl.Token.Literal
+}</span>
+
+func (fl *FunctionLiteral) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        var params []string
+        for _, p := range fl.Parameters </span><span class="cov0" title="0">{
+                params = append(params, p.String())
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString(fl.TokenLiteral())
+        out.WriteString("(")
+        out.WriteString(strings.Join(params, ", "))
+        out.WriteString(")")
+        out.WriteString(fl.Body.String())
+
+        return out.String()</span>
+}
+
+func (al *ArrayLiteral) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (al *ArrayLiteral) TokenLiteral() string <span class="cov0" title="0">{
+        return al.Token.Literal
+}</span>
+
+func (al *ArrayLiteral) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+        var elements []string
+        for _, el := range al.Elements </span><span class="cov0" title="0">{
+                elements = append(elements, el.String())
+        }</span>
+        <span class="cov0" title="0">out.WriteString("[")
+        out.WriteString(strings.Join(elements, ", "))
+        out.WriteString("]")
+        return out.String()</span>
+}
+
+func (hl *HashLiteral) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (hl *HashLiteral) TokenLiteral() string <span class="cov0" title="0">{
+        return hl.Token.Literal
+}</span>
+
+func (hl *HashLiteral) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        var pairs []string
+        for key, value := range hl.Pairs </span><span class="cov0" title="0">{
+                pairs = append(pairs, key.String()+":"+value.String())
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString("{")
+        out.WriteString(strings.Join(pairs, ", "))
+        out.WriteString("}")
+        return out.String()</span>
+}
+
+func (il *IntegerLiteral) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (il *IntegerLiteral) TokenLiteral() string <span class="cov0" title="0">{
+        return il.Token.Literal
+}</span>
+
+func (il *IntegerLiteral) String() string <span class="cov0" title="0">{
+        return il.Token.Literal
+}</span>
+
+func (sl *StringLiteral) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (sl *StringLiteral) TokenLiteral() string <span class="cov0" title="0">{
+        return sl.Token.Literal
+}</span>
+
+func (sl *StringLiteral) String() string <span class="cov0" title="0">{
+        return sl.Token.Literal
+}</span>
+
+func (b *Boolean) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (b *Boolean) TokenLiteral() string <span class="cov0" title="0">{
+        return b.Token.Literal
+}</span>
+
+func (b *Boolean) String() string <span class="cov0" title="0">{
+        return b.Token.Literal
+}</span>
+
+func (pe *PrefixExpression) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (pe *PrefixExpression) TokenLiteral() string <span class="cov0" title="0">{
+        return pe.Token.Literal
+}</span>
+
+func (pe *PrefixExpression) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        out.WriteString("(")
+        out.WriteString(pe.Operator)
+        out.WriteString(pe.Right.String())
+        out.WriteString(")")
+
+        return out.String()
+}</span>
+
+func (ie *InfixExpression) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (ie *InfixExpression) TokenLiteral() string <span class="cov0" title="0">{
+        return ie.Token.Literal
+}</span>
+
+func (ie *InfixExpression) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        out.WriteString("(")
+        out.WriteString(ie.Left.String())
+        out.WriteString(" " + ie.Operator + " ")
+        out.WriteString(ie.Right.String())
+        out.WriteString(")")
+
+        return out.String()
+}</span>
+
+func (ie *IfExpression) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (ie *IfExpression) TokenLiteral() string <span class="cov0" title="0">{
+        return ie.Token.Literal
+}</span>
+
+func (ie *IfExpression) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        out.WriteString("if")
+        out.WriteString(ie.Condition.String())
+        out.WriteString(" ")
+        out.WriteString(ie.Consequence.String())
+
+        if ie.Alternative != nil </span><span class="cov0" title="0">{
+                out.WriteString("else")
+                out.WriteString(ie.Alternative.String())
+        }</span>
+
+        <span class="cov0" title="0">return out.String()</span>
+}
+
+func (ce *CallExpression) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (ce *CallExpression) TokenLiteral() string <span class="cov0" title="0">{
+        return ce.Token.Literal
+}</span>
+
+func (ce *CallExpression) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        var args []string
+        for _, a := range ce.Arguments </span><span class="cov0" title="0">{
+                args = append(args, a.String())
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString(ce.Function.String())
+        out.WriteString("(")
+        out.WriteString(strings.Join(args, ", "))
+        out.WriteString(")")
+
+        return out.String()</span>
+}
+
+func (ie *IndexExpression) expressionNode() {<span class="cov0" title="0">
+
+}</span>
+
+// TokenLiteral returns the literal string of the token
+func (ie *IndexExpression) TokenLiteral() string <span class="cov0" title="0">{
+        return ie.Token.Literal
+}</span>
+
+func (ie *IndexExpression) String() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        out.WriteString("(")
+        out.WriteString(ie.Left.String())
+        out.WriteString("[")
+        out.WriteString(ie.Index.String())
+        out.WriteString("]")
+        out.WriteString(")")
+
+        return out.String()
+
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package evaluator
+
+import (
+        "bytes"
+        "fmt"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object"
+        "github.com/go-git/go-git/v5"
+        gitobject "github.com/go-git/go-git/v5/plumbing/object"
+        "regexp"
+        "strings"
+)
+
+var builtins = map[string]*object.Builtin{
+        "len": {
+                Fn: func(args ...object.Object) object.Object <span class="cov10" title="8">{
+                        if len(args) != 1 </span><span class="cov1" title="1">{
+                                return newError("wrong number of arguments. got=%d, want=1", len(args))
+                        }</span>
+
+                        <span class="cov9" title="7">switch arg := args[0].(type) </span>{
+                        case *object.Array:<span class="cov5" title="3">
+                                return &amp;object.Integer{Value: int64(len(arg.Elements))}</span>
+                        case *object.String:<span class="cov5" title="3">
+                                return &amp;object.Integer{Value: int64(len(arg.Value))}</span>
+                        default:<span class="cov1" title="1">
+                                return newError("argument to `len` not supported, got %s", args[0].Type())</span>
+                        }
+                },
+        },
+        "first": {
+                Fn: func(args ...object.Object) object.Object <span class="cov8" title="6">{
+                        if len(args) != 1 </span><span class="cov1" title="1">{
+                                return newError("wrong number of arguments. got=%d, want=1", len(args))
+                        }</span>
+
+                        <span class="cov7" title="5">if args[0].Type() != object.ArrayObj </span><span class="cov1" title="1">{
+                                return newError("argument to `first` must be ARRAY, got %s", args[0].Type())
+                        }</span>
+
+                        <span class="cov7" title="4">arr := args[0].(*object.Array)
+                        if len(arr.Elements) &gt; 0 </span><span class="cov5" title="3">{
+                                return arr.Elements[0]
+                        }</span>
+
+                        <span class="cov1" title="1">return NULL</span>
+                },
+        },
+        "last": {
+                Fn: func(args ...object.Object) object.Object <span class="cov8" title="6">{
+                        if len(args) != 1 </span><span class="cov1" title="1">{
+                                return newError("wrong number of arguments. got=%d, want=1", len(args))
+                        }</span>
+
+                        <span class="cov7" title="5">if args[0].Type() != object.ArrayObj </span><span class="cov1" title="1">{
+                                return newError("argument to `last` must be ARRAY, got %s",
+                                        args[0].Type())
+                        }</span>
+
+                        <span class="cov7" title="4">arr := args[0].(*object.Array)
+                        length := len(arr.Elements)
+                        if length &gt; 0 </span><span class="cov5" title="3">{
+                                return arr.Elements[length-1]
+                        }</span>
+
+                        <span class="cov1" title="1">return NULL</span>
+                },
+        },
+        "rest": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        if len(args) != 1 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=1",
+                                        len(args))
+                        }</span>
+
+                        <span class="cov0" title="0">if args[0].Type() != object.ArrayObj </span><span class="cov0" title="0">{
+                                return newError("argument to `rest` must be ARRAY, got %s",
+                                        args[0].Type())
+                        }</span>
+
+                        <span class="cov0" title="0">arr := args[0].(*object.Array)
+                        length := len(arr.Elements)
+                        if length &gt; 0 </span><span class="cov0" title="0">{
+                                newElements := make([]object.Object, length-1, length-1)
+                                copy(newElements, arr.Elements[1:length])
+                                return &amp;object.Array{Elements: newElements}
+                        }</span>
+
+                        <span class="cov0" title="0">return NULL</span>
+                },
+        },
+        "push": {
+                Fn: func(args ...object.Object) object.Object <span class="cov8" title="6">{
+                        if len(args) != 2 </span><span class="cov1" title="1">{
+                                return newError("wrong number of arguments. got=%d, want=2",
+                                        len(args))
+                        }</span>
+
+                        <span class="cov7" title="5">if args[0].Type() != object.ArrayObj </span><span class="cov1" title="1">{
+                                return newError("argument to `push` must be ARRAY, got %s",
+                                        args[0].Type())
+                        }</span>
+
+                        <span class="cov7" title="4">arr := args[0].(*object.Array)
+                        length := len(arr.Elements)
+                        newElements := make([]object.Object, length+1, length+1)
+                        copy(newElements, arr.Elements)
+                        newElements[length] = args[1]
+                        return &amp;object.Array{Elements: newElements}</span>
+                },
+        },
+        "print": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        for _, arg := range args </span><span class="cov0" title="0">{
+                                fmt.Println(arg.Inspect())
+                        }</span>
+
+                        <span class="cov0" title="0">return NULL</span>
+                },
+        },
+        "initRepo": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        if len(args) != 1 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=0", len(args)-1)
+                        }</span>
+
+                        <span class="cov0" title="0">repoObj := &amp;object.Repo{Path: args[0]}
+                        repoObj.Repo.Open(args[0].Inspect())
+                        repoObj.Repo.InitHeadRef()
+
+                        return repoObj</span>
+                },
+                RequireEnv: true,
+                EnvName:    "repopath",
+        },
+        "whichRepo": {
+                Fn: func(args ...object.Object) object.Object <span class="cov4" title="2">{
+                        if len(args) != 1 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=0", len(args)-1)
+                        }</span>
+
+                        <span class="cov4" title="2">return &amp;object.String{Value: args[0].Inspect()}</span>
+                },
+                RequireEnv: true,
+                EnvName:    "repopath",
+        },
+        "extractTags": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        if len(args) != 2 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=2", len(args))
+                        }</span>
+
+                        <span class="cov0" title="0">repo, ok := args[0].(*object.Repo)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[0] to *object.Repo while executing 'extractTags'")
+                        }</span>
+
+                        <span class="cov0" title="0">version, ok := args[1].(*object.String)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[1] to *object.String while executing 'extractTags'")
+                        }</span>
+
+                        <span class="cov0" title="0">var buffer bytes.Buffer
+                        for _, c := range version.Inspect() </span><span class="cov0" title="0">{
+                                cc := string(c)
+
+                                if cc == "$" </span><span class="cov0" title="0">{
+                                        buffer.WriteString("([0-9]+)")
+                                }</span> else<span class="cov0" title="0"> if cc == "." </span><span class="cov0" title="0">{
+                                        buffer.WriteString("\\.")
+                                }</span> else<span class="cov0" title="0"> if cc == "*" </span><span class="cov0" title="0">{
+                                        buffer.WriteString(".*")
+                                }</span> else<span class="cov0" title="0"> if cc == "+" </span><span class="cov0" title="0">{
+                                        buffer.WriteString(".+")
+                                }</span> else<span class="cov0" title="0"> {
+                                        buffer.WriteString(cc)
+                                }</span>
+                        }
+
+                        <span class="cov0" title="0">buffer.WriteString("$")
+
+                        if ok := repo.Repo.FetchAllMatchingTags(buffer.String()); !ok </span><span class="cov0" title="0">{
+                                return newError("Failed to fetch tag (plumbing.Reference) on repo")
+                        }</span>
+
+                        <span class="cov0" title="0">return NULL</span>
+                },
+        },
+        "getTag": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        if len(args) != 2 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=2", len(args))
+                        }</span>
+
+                        <span class="cov0" title="0">repo, ok := args[0].(*object.Repo)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[0] to *object.Repo while executing 'getTag'")
+                        }</span>
+
+                        <span class="cov0" title="0">tagName, ok := args[1].(*object.String)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[1] to *object.String while executing 'getTag'")
+                        }</span>
+
+                        <span class="cov0" title="0">tag := repo.Repo.GetSpecificTag(tagName.Value)
+                        if tag == nil </span><span class="cov0" title="0">{
+                                return NULL
+                        }</span>
+
+                        <span class="cov0" title="0">value := &amp;object.String{Value: tag.Name}
+                        tagObj := &amp;object.Tag{Value: value, Tag: tag}
+                        return tagObj</span>
+                },
+        },
+        "getLatestTag": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        if len(args) != 2 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=2", len(args))
+                        }</span>
+
+                        <span class="cov0" title="0">repo, ok := args[0].(*object.Repo)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[0] to *object.Repo while executing 'getLatestTag'")
+                        }</span>
+
+                        <span class="cov0" title="0">integer, ok := args[1].(*object.Integer)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[1] to *object.Integer while executing 'getLatestTag'")
+                        }</span>
+
+                        <span class="cov0" title="0">tag := repo.Repo.GetLatestTag(integer.Value)
+                        if tag == nil </span><span class="cov0" title="0">{
+                                return NULL
+                        }</span>
+
+                        <span class="cov0" title="0">value := &amp;object.String{Value: tag.Name}
+                        pr := &amp;object.Tag{Value: value, Tag: tag}
+                        return pr</span>
+                },
+        },
+        "diff": {
+                Fn: func(args ...object.Object) object.Object <span class="cov0" title="0">{
+                        if len(args) != 4 </span><span class="cov0" title="0">{
+                                return newError("wrong number of arguments. got=%d, want=3", len(args)-1)
+                        }</span>
+
+                        <span class="cov0" title="0">ticketRegex, ok := args[0].(*object.String)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[0] to *object.String while executing 'diff'")
+                        }</span>
+
+                        <span class="cov0" title="0">repo, ok := args[1].(*object.Repo)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[1] to *object.Repo while executing 'diff'")
+                        }</span>
+
+                        <span class="cov0" title="0">from, ok := args[2].(*object.Tag)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[2] ('from') to *object.Tag while executing 'diff'")
+                        }</span>
+
+                        <span class="cov0" title="0">to, ok := args[3].(*object.Tag)
+                        if !ok </span><span class="cov0" title="0">{
+                                return newError("Unable to convert args[3] ('to') to *object.Tag while executing 'diff'")
+                        }</span>
+
+                        // ---------------------------------------------
+                        // Extract the log iterator from the 'from' hash
+                        // ---------------------------------------------
+                        <span class="cov0" title="0">commitFromTag, _ := from.Tag.Commit()
+                        iterFrom, errFrom := repo.Repo.GitRepo.Log(&amp;git.LogOptions{From: commitFromTag.Hash})
+                        if errFrom != nil </span><span class="cov0" title="0">{
+                                return newError("an error occured while retrieving the commit history from 'fromHash'")
+                        }</span>
+
+                        // -------------------------------------------
+                        // Extract the log iterator from the 'to' hash
+                        // -------------------------------------------
+                        <span class="cov0" title="0">commitToTag, _ := to.Tag.Commit()
+                        iterTo, errTo := repo.Repo.GitRepo.Log(&amp;git.LogOptions{From: commitToTag.Hash})
+                        if errTo != nil </span><span class="cov0" title="0">{
+                                return newError("an error occured while retrieving the commit history from 'toHash'")
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("Performing diff on %s --&gt; %s\n", from.Tag.Name, to.Tag.Name)
+
+                        // ----------------------------
+                        // Initialize the commit slices
+                        // ----------------------------
+                        commitFromSlice := make([]*gitobject.Commit, 0)
+                        commitToSlice := make([]*gitobject.Commit, 0)
+
+                        _ = iterFrom.ForEach(func(commit *gitobject.Commit) error </span><span class="cov0" title="0">{
+                                commitFromSlice = append(commitFromSlice, commit)
+                                return nil
+                        }</span>)
+
+                        <span class="cov0" title="0">_ = iterTo.ForEach(func(commit *gitobject.Commit) error </span><span class="cov0" title="0">{
+                                commitToSlice = append(commitToSlice, commit)
+                                return nil
+                        }</span>)
+
+                        // ------------------------------------------------
+                        // Perform the actual diff operation on both slices
+                        // ------------------------------------------------
+                        <span class="cov0" title="0">diff := make([]*gitobject.Commit, 0)
+                        for i := 0; i &lt; 2; i++ </span><span class="cov0" title="0">{
+                                for _, s1 := range commitToSlice </span><span class="cov0" title="0">{
+                                        found := false
+                                        for _, s2 := range commitFromSlice </span><span class="cov0" title="0">{
+                                                if s1.Hash == s2.Hash </span><span class="cov0" title="0">{
+                                                        found = true
+                                                        break</span>
+                                                }
+                                        }
+
+                                        <span class="cov0" title="0">if !found </span><span class="cov0" title="0">{
+                                                diff = append(diff, s1)
+                                        }</span>
+                                }
+
+                                <span class="cov0" title="0">if i == 0 </span><span class="cov0" title="0">{
+                                        commitToSlice, commitFromSlice = commitFromSlice, commitToSlice
+                                }</span>
+                        }
+
+                        // ------------------------------------------------
+                        // Look in the commits and append when matching
+                        // ------------------------------------------------
+                        <span class="cov0" title="0">var TicketSlice []string
+                        for _, c := range diff </span><span class="cov0" title="0">{
+                                if presentInMessage, ticket := tickets(c.Message, ticketRegex.Value); presentInMessage </span><span class="cov0" title="0">{
+                                        TicketSlice = append(TicketSlice, ticket...)
+                                }</span>
+                        }
+
+                        <span class="cov0" title="0">TicketSlice = unique(TicketSlice)
+                        fmt.Println(TicketSlice)
+
+                        return NULL</span>
+                },
+                RequireEnv: true,
+                EnvName:    "tickets",
+        },
+}
+
+func tickets(text, ticketRegex string) (bool, []string) <span class="cov0" title="0">{
+        regex := "((?:"
+        if ticketRegex == "*" </span><span class="cov0" title="0">{
+                regex += "[a-zA-Z0-9]+"
+        }</span> else<span class="cov0" title="0"> {
+                regex += strings.ReplaceAll(ticketRegex, ",", "|")
+        }</span>
+        <span class="cov0" title="0">regex += ")-[0-9]+)"
+
+        r, _ := regexp.Compile(regex)
+
+        out := r.FindAllString(text, -1)
+
+        if len(out) == 0 </span><span class="cov0" title="0">{
+                return false, []string{}
+        }</span>
+
+        <span class="cov0" title="0">return true, out</span>
+}
+
+func unique(s []string) []string <span class="cov0" title="0">{
+        u := make([]string, 0, len(s))
+        m := make(map[string]bool)
+
+        for _, val := range s </span><span class="cov0" title="0">{
+                if _, ok := m[val]; !ok </span><span class="cov0" title="0">{
+                        m[val] = true
+                        u = append(u, val)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return u</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Package evaluator contains the evaluating functions to process the different ast.Node
+package evaluator
+
+import (
+        "fmt"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/ast"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object"
+)
+
+// Constant defining object that are frequently used. This allows the interpreter to reuse these object instead
+// of creating new entry in memory
+// Objects constant:
+//        - NULL
+//        - TRUE
+//        - FALSE
+var (
+        NULL  = &amp;object.Null{}
+        TRUE  = &amp;object.Boolean{Value: true}
+        FALSE = &amp;object.Boolean{Value: false}
+)
+
+// Eval is the main function of the evaluator. It determines which function to call based on the type of node received
+func Eval(node ast.Node, env *object.Environment) object.Object <span class="cov10" title="931">{
+        switch node := node.(type) </span>{
+        // Statements
+        case *ast.Program:<span class="cov7" title="125">
+                return evalProgram(node, env)</span>
+        case *ast.ExpressionStatement:<span class="cov7" title="140">
+                return Eval(node.Expression, env)</span>
+        case *ast.BlockStatement:<span class="cov4" title="19">
+                return evalBlockStatement(node, env)</span>
+        case *ast.ReturnStatement:<span class="cov3" title="7">
+                val := Eval(node.ReturnValue, env)
+                if isError(val) </span><span class="cov1" title="1">{
+                        return val
+                }</span>
+                <span class="cov3" title="6">return &amp;object.ReturnValue{Value: val}</span>
+        case *ast.LetStatement:<span class="cov5" title="24">
+                val := Eval(node.Value, env)
+                if isError(val) </span><span class="cov0" title="0">{
+                        return val
+                }</span>
+                <span class="cov5" title="24">env.Set(node.Name.Value, val)</span>
+        case *ast.SetStatement:<span class="cov1" title="2">
+                val := Eval(node.Value, env)
+                if isError(val) </span><span class="cov0" title="0">{
+                        return val
+                }</span>
+                <span class="cov1" title="2">env.Set(node.Name.Value, val)</span>
+
+        // Expressions/Literals
+        case *ast.IntegerLiteral:<span class="cov8" title="238">
+                return &amp;object.Integer{Value: node.Value}</span>
+        case *ast.StringLiteral:<span class="cov5" title="32">
+                return &amp;object.String{Value: node.Value}</span>
+        case *ast.Boolean:<span class="cov5" title="39">
+                return nativeBoolToBooleanObject(node.Value)</span>
+        case *ast.PrefixExpression:<span class="cov4" title="17">
+                right := Eval(node.Right, env)
+                if isError(right) </span><span class="cov0" title="0">{
+                        return right
+                }</span>
+                <span class="cov4" title="17">return evalPrefixExpression(node.Operator, right)</span>
+        case *ast.InfixExpression:<span class="cov6" title="94">
+                left := Eval(node.Left, env)
+                if isError(left) </span><span class="cov0" title="0">{
+                        return left
+                }</span>
+
+                <span class="cov6" title="94">right := Eval(node.Right, env)
+                if isError(right) </span><span class="cov0" title="0">{
+                        return right
+                }</span>
+
+                <span class="cov6" title="94">return evalInfixExpression(node.Operator, left, right)</span>
+        case *ast.IfExpression:<span class="cov4" title="12">
+                return evalIfExpression(node, env)</span>
+        case *ast.FunctionLiteral:<span class="cov4" title="10">
+                params := node.Parameters
+                body := node.Body
+                return &amp;object.Function{Parameters: params, Env: env, Body: body}</span>
+        case *ast.CallExpression:<span class="cov5" title="37">
+                function := Eval(node.Function, env)
+                if isError(function) </span><span class="cov0" title="0">{
+                        return function
+                }</span>
+
+                <span class="cov5" title="37">args := evalExpressions(node.Arguments, env)
+                if len(args) == 1 &amp;&amp; isError(args[0]) </span><span class="cov0" title="0">{
+                        return args[0]
+                }</span>
+
+                <span class="cov5" title="37">return applyFunction(function, env, args)</span>
+        case *ast.ArrayLiteral:<span class="cov5" title="31">
+                elements := evalExpressions(node.Elements, env)
+                if len(elements) == 1 &amp;&amp; isError(elements[0]) </span><span class="cov0" title="0">{
+                        return elements[0]
+                }</span>
+
+                <span class="cov5" title="31">return &amp;object.Array{Elements: elements}</span>
+        case *ast.HashLiteral:<span class="cov3" title="9">
+                return evalHashLiteral(node, env)</span>
+        case *ast.IndexExpression:<span class="cov5" title="25">
+                left := Eval(node.Left, env)
+                if isError(left) </span><span class="cov0" title="0">{
+                        return left
+                }</span>
+
+                <span class="cov5" title="25">index := Eval(node.Index, env)
+                if isError(index) </span><span class="cov0" title="0">{
+                        return index
+                }</span>
+
+                <span class="cov5" title="25">return evalIndexExpression(left, index)</span>
+
+        // Identifiers
+        case *ast.Identifier:<span class="cov6" title="70">
+                return evalIdentifier(node, env)</span>
+        }
+
+        <span class="cov5" title="26">return nil</span>
+}
+
+func evalProgram(program *ast.Program, env *object.Environment) object.Object <span class="cov7" title="125">{
+        var result object.Object
+
+        for _, statement := range program.Statements </span><span class="cov7" title="154">{
+                result = Eval(statement, env)
+
+                switch result := result.(type) </span>{
+                case *object.ReturnValue:<span class="cov3" title="5">
+                        return result.Value</span>
+                case *object.Error:<span class="cov4" title="18">
+                        return result</span>
+                }
+        }
+
+        <span class="cov7" title="102">return result</span>
+}
+
+func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object <span class="cov4" title="19">{
+        var result object.Object
+
+        for _, statement := range block.Statements </span><span class="cov4" title="19">{
+                result = Eval(statement, env)
+
+                if result != nil </span><span class="cov4" title="19">{
+                        rt := result.Type()
+                        if rt == object.ReturnValueObj || rt == object.ErrorObj </span><span class="cov3" title="6">{
+                                return result
+                        }</span>
+                }
+        }
+
+        <span class="cov4" title="13">return result</span>
+}
+
+func evalPrefixExpression(operator string, right object.Object) object.Object <span class="cov4" title="17">{
+        switch operator </span>{
+        case "!":<span class="cov3" title="9">
+                return evalBangOperatorExpression(right)</span>
+        case "-":<span class="cov3" title="8">
+                return evalMinusPrefixOperatorExpression(right)</span>
+        default:<span class="cov0" title="0">
+                return newError("unknown operator: %s%s", operator, right.Type())</span>
+        }
+}
+
+func evalInfixExpression(operator string, left object.Object, right object.Object) object.Object <span class="cov6" title="94">{
+        switch </span>{
+        case left.Type() == object.IntegerObj &amp;&amp; right.Type() == object.IntegerObj:<span class="cov6" title="73">
+                return evalIntegerInfixExpression(operator, left, right)</span>
+        case left.Type() == object.StringObj &amp;&amp; right.Type() == object.StringObj:<span class="cov3" title="6">
+                return evalStringInfixExpression(operator, left, right)</span>
+        case operator == "==":<span class="cov3" title="7">
+                return nativeBoolToBooleanObject(left == right)</span>
+        case operator == "!=":<span class="cov1" title="2">
+                return nativeBoolToBooleanObject(left != right)</span>
+        case left.Type() != right.Type():<span class="cov1" title="2">
+                return newError("type mismatch: %s %s %s",
+                        left.Type(), operator, right.Type())</span>
+        default:<span class="cov2" title="4">
+                return newError("unknown operator: %s %s %s",
+                        left.Type(), operator, right.Type())</span>
+        }
+}
+
+func evalBangOperatorExpression(right object.Object) object.Object <span class="cov3" title="9">{
+        switch right </span>{
+        case TRUE:<span class="cov2" title="3">
+                return FALSE</span>
+        case FALSE:<span class="cov2" title="4">
+                return TRUE</span>
+        case NULL:<span class="cov0" title="0">
+                return TRUE</span>
+        default:<span class="cov1" title="2">
+                return FALSE</span>
+        }
+}
+
+func evalMinusPrefixOperatorExpression(right object.Object) object.Object <span class="cov3" title="8">{
+        if right.Type() != object.IntegerObj </span><span class="cov1" title="1">{
+                return newError("unknown operator: -%s", right.Type())
+        }</span>
+
+        <span class="cov3" title="7">value := right.(*object.Integer).Value
+        return &amp;object.Integer{Value: -value}</span>
+}
+
+func evalIntegerInfixExpression(operator string, left object.Object, right object.Object) object.Object <span class="cov6" title="73">{
+        leftVal := left.(*object.Integer).Value
+        rightVal := right.(*object.Integer).Value
+
+        switch operator </span>{
+        case "+":<span class="cov5" title="27">
+                return &amp;object.Integer{Value: leftVal + rightVal}</span>
+        case "-":<span class="cov1" title="2">
+                return &amp;object.Integer{Value: leftVal - rightVal}</span>
+        case "*":<span class="cov4" title="20">
+                return &amp;object.Integer{Value: leftVal * rightVal}</span>
+        case "/":<span class="cov2" title="3">
+                return &amp;object.Integer{Value: leftVal / rightVal}</span>
+        case "&lt;":<span class="cov3" title="6">
+                return nativeBoolToBooleanObject(leftVal &lt; rightVal)</span>
+        case "&gt;":<span class="cov4" title="11">
+                return nativeBoolToBooleanObject(leftVal &gt; rightVal)</span>
+        case "==":<span class="cov1" title="2">
+                return nativeBoolToBooleanObject(leftVal == rightVal)</span>
+        case "!=":<span class="cov1" title="2">
+                return nativeBoolToBooleanObject(leftVal != rightVal)</span>
+        default:<span class="cov0" title="0">
+                return newError("unknown operator: %s %s %s",
+                        left.Type(), operator, right.Type())</span>
+        }
+}
+
+func evalStringInfixExpression(operator string, left object.Object, right object.Object) object.Object <span class="cov3" title="6">{
+        switch operator </span>{
+        case "+":<span class="cov2" title="3">
+                leftVal := left.(*object.String).Value
+                rightVal := right.(*object.String).Value
+                return &amp;object.String{Value: leftVal + rightVal}</span>
+        case "==":<span class="cov1" title="1">
+                leftVal := left.(*object.String).Value
+                rightVal := right.(*object.String).Value
+                return &amp;object.Boolean{Value: leftVal == rightVal}</span>
+        case "!=":<span class="cov1" title="1">
+                leftVal := left.(*object.String).Value
+                rightVal := right.(*object.String).Value
+                return &amp;object.Boolean{Value: leftVal != rightVal}</span>
+        default:<span class="cov1" title="1">
+                return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())</span>
+        }
+}
+
+func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object <span class="cov4" title="12">{
+        condition := Eval(ie.Condition, env)
+        if isError(condition) </span><span class="cov0" title="0">{
+                return condition
+        }</span>
+
+        <span class="cov4" title="12">if isTruthy(condition) </span><span class="cov3" title="9">{
+                return Eval(ie.Consequence, env)
+        }</span> else<span class="cov2" title="3"> if ie.Alternative != nil </span><span class="cov1" title="1">{
+                return Eval(ie.Alternative, env)
+        }</span> else<span class="cov1" title="2"> {
+                return NULL
+        }</span>
+}
+
+func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object <span class="cov6" title="70">{
+        if val, ok := env.Get(node.Value); ok </span><span class="cov5" title="41">{
+                return val
+        }</span>
+
+        <span class="cov5" title="29">if builtin, ok := builtins[node.Value]; ok </span><span class="cov5" title="28">{
+                return builtin
+        }</span>
+
+        <span class="cov1" title="1">return newError("identifier not found: " + node.Value)</span>
+}
+
+func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object <span class="cov3" title="9">{
+        pairs := make(map[object.HashKey]object.HashPair)
+
+        for keyNode, valueNode := range node.Pairs </span><span class="cov4" title="13">{
+                key := Eval(keyNode, env)
+                if isError(key) </span><span class="cov0" title="0">{
+                        return key
+                }</span>
+
+                <span class="cov4" title="13">hashKey, ok := key.(object.Hashable)
+                if !ok </span><span class="cov0" title="0">{
+                        return newError("unusable as hash key: %s", key.Type())
+                }</span>
+
+                <span class="cov4" title="13">value := Eval(valueNode, env)
+                if isError(value) </span><span class="cov0" title="0">{
+                        return value
+                }</span>
+
+                <span class="cov4" title="13">hashed := hashKey.HashKey()
+                pairs[hashed] = object.HashPair{Key: key, Value: value}</span>
+        }
+
+        <span class="cov3" title="9">return &amp;object.Hash{Pairs: pairs}</span>
+}
+
+func evalIndexExpression(left object.Object, index object.Object) object.Object <span class="cov5" title="25">{
+        switch </span>{
+        case left.Type() == object.ArrayObj &amp;&amp; index.Type() == object.IntegerObj:<span class="cov4" title="17">
+                return evalArrayIndexExpression(left, index)</span>
+        case left.Type() == object.HashObj:<span class="cov3" title="8">
+                return evalHashIndexExpression(left, index)</span>
+        default:<span class="cov0" title="0">
+                return newError("index operator not supported: %s", left.Type())</span>
+        }
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object <span class="cov4" title="17">{
+        arrayObject := array.(*object.Array)
+        idx := index.(*object.Integer).Value
+        max := int64(len(arrayObject.Elements) - 1)
+
+        if idx &lt; 0 || idx &gt; max </span><span class="cov1" title="2">{
+                return NULL
+        }</span>
+
+        <span class="cov4" title="15">return arrayObject.Elements[idx]</span>
+}
+
+func evalHashIndexExpression(hash, index object.Object) object.Object <span class="cov3" title="8">{
+        hashObject := hash.(*object.Hash)
+
+        key, ok := index.(object.Hashable)
+        if !ok </span><span class="cov1" title="1">{
+                return newError("unusable as hash key: %s", index.Type())
+        }</span>
+
+        <span class="cov3" title="7">pair, ok := hashObject.Pairs[key.HashKey()]
+        if !ok </span><span class="cov1" title="2">{
+                return NULL
+        }</span>
+
+        <span class="cov3" title="5">return pair.Value</span>
+}
+
+func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Object <span class="cov6" title="68">{
+        var result []object.Object
+
+        for _, e := range exps </span><span class="cov7" title="111">{
+                evaluated := Eval(e, env)
+                if isError(evaluated) </span><span class="cov0" title="0">{
+                        return []object.Object{evaluated}
+                }</span>
+
+                <span class="cov7" title="111">result = append(result, evaluated)</span>
+        }
+
+        <span class="cov6" title="68">return result</span>
+}
+
+func applyFunction(fn object.Object, env *object.Environment, args []object.Object) object.Object <span class="cov5" title="37">{
+        switch fn := fn.(type) </span>{
+        case *object.Function:<span class="cov3" title="9">
+                extendedEnv := extendedFunctionEnv(fn, args)
+                evaluated := Eval(fn.Body, extendedEnv)
+                return unwrapReturnValue(evaluated)</span>
+        case *object.Builtin:<span class="cov5" title="28">
+                if fn.RequireEnv </span><span class="cov1" title="2">{
+                        obj, ok := env.Get(fn.EnvName)
+                        if ok </span><span class="cov1" title="2">{
+                                objs := make([]object.Object, 0)
+                                objs = append(objs, obj)
+                                objs = append(objs, args...)
+                                return fn.Fn(objs...)
+                        }</span>
+                }
+                <span class="cov5" title="26">return fn.Fn(args...)</span>
+        default:<span class="cov0" title="0">
+                return newError("not a function: %s", fn.Type())</span>
+        }
+}
+
+func extendedFunctionEnv(fn *object.Function, args []object.Object) *object.Environment <span class="cov3" title="9">{
+        env := object.NewEnclosedEnvironment(fn.Env)
+
+        for paramID, param := range fn.Parameters </span><span class="cov4" title="12">{
+                env.Set(param.Value, args[paramID])
+        }</span>
+
+        <span class="cov3" title="9">return env</span>
+}
+
+func unwrapReturnValue(obj object.Object) object.Object <span class="cov3" title="9">{
+        if returnValue, ok := obj.(*object.ReturnValue); ok </span><span class="cov1" title="1">{
+                return returnValue.Value
+        }</span>
+
+        <span class="cov3" title="8">return obj</span>
+}
+
+func nativeBoolToBooleanObject(input bool) object.Object <span class="cov6" title="69">{
+        if input </span><span class="cov5" title="39">{
+                return TRUE
+        }</span>
+
+        <span class="cov5" title="30">return FALSE</span>
+}
+
+func isTruthy(obj object.Object) bool <span class="cov4" title="12">{
+        switch obj </span>{
+        case NULL:<span class="cov0" title="0">
+                return false</span>
+        case TRUE:<span class="cov3" title="8">
+                return true</span>
+        case FALSE:<span class="cov2" title="3">
+                return false</span>
+        default:<span class="cov1" title="1">
+                return true</span>
+        }
+}
+
+func isError(obj object.Object) bool <span class="cov9" title="503">{
+        if obj != nil </span><span class="cov9" title="503">{
+                return obj.Type() == object.ErrorObj
+        }</span>
+
+        <span class="cov0" title="0">return false</span>
+}
+
+func newError(format string, a ...interface{}) *object.Error <span class="cov4" title="18">{
+        return &amp;object.Error{Message: fmt.Sprintf(format, a...)}
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// Package lexer contains the definition of the lexer element of the glif interpreter
+package lexer
+
+import (
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/gitoken"
+)
+
+// Lexer is the representation of the glif lexer
+// It contains the following:
+//        - An input string (the program)
+//        - Positions indicators
+//        - A byte representing the current character under examination
+type Lexer struct {
+        input        string
+        position     int  // current position in input (points to current char)
+        readPosition int  // current reading position in input (after current char)
+        ch           byte // current char under examination
+}
+
+// New creates a new lexer from an input string (program/code)
+func New(input string) *Lexer <span class="cov1" title="1">{
+        l := &amp;Lexer{input: input}
+        l.readChar()
+        return l
+}</span>
+
+func newToken(tokenType gitoken.TokenType, ch byte) gitoken.Token <span class="cov7" title="44">{
+        return gitoken.Token{Type: tokenType, Literal: string(ch)}
+}</span>
+
+func isLetter(ch byte) bool <span class="cov9" title="158">{
+        return 'a' &lt;= ch &amp;&amp; ch &lt;= 'z' || 'A' &lt;= ch &amp;&amp; ch &lt;= 'Z' || ch == '_'
+}</span>
+
+func isDigit(ch byte) bool <span class="cov7" title="48">{
+        return '0' &lt;= ch &amp;&amp; ch &lt;= '9'
+}</span>
+
+// NextToken reads the next gitoken.Token by parsing the next one (or two) bytes
+func (l *Lexer) NextToken() gitoken.Token <span class="cov8" title="94">{
+        var tkn gitoken.Token
+
+        l.skipWhitespace()
+
+        switch l.ch </span>{
+        case '=':<span class="cov3" title="5">
+                if l.peekChar() == '=' </span><span class="cov1" title="1">{
+                        ch := l.ch
+                        l.readChar()
+                        tkn = gitoken.Token{Type: gitoken.EQ, Literal: string(ch) + string(l.ch)}
+                }</span> else<span class="cov3" title="4"> {
+                        tkn = newToken(gitoken.ASSIGN, l.ch)
+                }</span>
+        case '+':<span class="cov1" title="1">
+                tkn = newToken(gitoken.PLUS, l.ch)</span>
+        case '-':<span class="cov2" title="2">
+                if l.peekChar() == '&gt;' </span><span class="cov1" title="1">{
+                        ch := l.ch
+                        l.readChar()
+                        tkn = gitoken.Token{Type: gitoken.TO, Literal: string(ch) + string(l.ch)}
+                }</span> else<span class="cov1" title="1"> {
+                        tkn = newToken(gitoken.MINUS, l.ch)
+                }</span>
+        case ';':<span class="cov5" title="12">
+                tkn = newToken(gitoken.SEMICOLON, l.ch)</span>
+        case ',':<span class="cov2" title="3">
+                tkn = newToken(gitoken.COMMA, l.ch)</span>
+        case '(':<span class="cov2" title="3">
+                tkn = newToken(gitoken.LPAREN, l.ch)</span>
+        case ')':<span class="cov2" title="3">
+                tkn = newToken(gitoken.RPAREN, l.ch)</span>
+        case '{':<span class="cov3" title="4">
+                tkn = newToken(gitoken.LBRACE, l.ch)</span>
+        case '}':<span class="cov3" title="4">
+                tkn = newToken(gitoken.RBRACE, l.ch)</span>
+        case '[':<span class="cov1" title="1">
+                tkn = newToken(gitoken.LBRAKET, l.ch)</span>
+        case ']':<span class="cov1" title="1">
+                tkn = newToken(gitoken.RBRAKET, l.ch)</span>
+        case ':':<span class="cov1" title="1">
+                tkn = newToken(gitoken.COLON, l.ch)</span>
+        case '!':<span class="cov2" title="2">
+                if l.peekChar() == '=' </span><span class="cov1" title="1">{
+                        ch := l.ch
+                        l.readChar()
+                        tkn = gitoken.Token{Type: gitoken.NOTEQ, Literal: string(ch) + string(l.ch)}
+                }</span> else<span class="cov1" title="1"> {
+                        tkn = newToken(gitoken.BANG, l.ch)
+                }</span>
+        case '*':<span class="cov1" title="1">
+                tkn = newToken(gitoken.ASTERISK, l.ch)</span>
+        case '/':<span class="cov1" title="1">
+                tkn = newToken(gitoken.SLASH, l.ch)</span>
+        case '&lt;':<span class="cov2" title="2">
+                tkn = newToken(gitoken.LT, l.ch)</span>
+        case '&gt;':<span class="cov1" title="1">
+                tkn = newToken(gitoken.GT, l.ch)</span>
+
+        case '"':<span class="cov3" title="5">
+                tkn.Type = gitoken.STRING
+                tkn.Literal = l.readString()</span>
+        case 0:<span class="cov1" title="1">
+                tkn.Literal = ""
+                tkn.Type = gitoken.EOF</span>
+        default:<span class="cov6" title="41">
+                if isLetter(l.ch) </span><span class="cov6" title="27">{
+                        tkn.Literal = l.readIdentifier()
+                        tkn.Type = gitoken.LookupIdent(tkn.Literal)
+                        return tkn
+                }</span> else<span class="cov5" title="14"> if isDigit(l.ch) </span><span class="cov5" title="14">{
+                        tkn.Type = gitoken.INT
+                        tkn.Literal = l.readNumber()
+                        return tkn
+                }</span> else<span class="cov0" title="0"> {
+                        tkn = newToken(gitoken.ILLEGAL, l.ch)
+                }</span>
+        }
+
+        <span class="cov7" title="53">l.readChar()
+        return tkn</span>
+}
+
+func (l *Lexer) readChar() <span class="cov10" title="264">{
+        if l.readPosition &gt;= len(l.input) </span><span class="cov2" title="2">{
+                l.ch = 0
+        }</span> else<span class="cov9" title="262"> {
+                l.ch = l.input[l.readPosition]
+        }</span>
+
+        <span class="cov10" title="264">l.position = l.readPosition
+        l.readPosition++</span>
+}
+
+func (l *Lexer) readNumber() string <span class="cov5" title="14">{
+        position := l.position
+        for isDigit(l.ch) </span><span class="cov5" title="20">{
+                l.readChar()
+        }</span>
+
+        <span class="cov5" title="14">return l.input[position:l.position]</span>
+}
+
+func (l *Lexer) readIdentifier() string <span class="cov6" title="27">{
+        position := l.position
+        for isLetter(l.ch) </span><span class="cov8" title="90">{
+                l.readChar()
+        }</span>
+
+        <span class="cov6" title="27">return l.input[position:l.position]</span>
+}
+
+func (l *Lexer) readString() string <span class="cov3" title="5">{
+        position := l.position + 1
+        for </span><span class="cov6" title="31">{
+                l.readChar()
+                if l.ch == '"' || l.ch == 0 </span><span class="cov3" title="5">{
+                        break</span>
+                }
+        }
+
+        <span class="cov3" title="5">return l.input[position:l.position]</span>
+}
+
+func (l *Lexer) skipWhitespace() <span class="cov8" title="94">{
+        for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' </span><span class="cov7" title="66">{
+                l.readChar()
+        }</span>
+}
+
+func (l *Lexer) peekChar() byte <span class="cov4" title="9">{
+        if l.readPosition &gt;= len(l.input) </span><span class="cov0" title="0">{
+                return 0
+        }</span>
+
+        <span class="cov4" title="9">return l.input[l.readPosition]</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package object
+
+import (
+        "bytes"
+        "strings"
+)
+
+// Array represent a standard collection of object
+type Array struct {
+        Elements []Object
+}
+
+// Type returns ArrayObj (ARRAY)
+func (a *Array) Type() Type <span class="cov0" title="0">{
+        return ArrayObj
+}</span>
+
+// Inspect the content the Array type
+func (a *Array) Inspect() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        var elements []string
+        for _, e := range a.Elements </span><span class="cov0" title="0">{
+                elements = append(elements, e.Inspect())
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString("[")
+        out.WriteString(strings.Join(elements, ", "))
+        out.WriteString("]")
+        return out.String()</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package object
+
+import "fmt"
+
+// Boolean is a wrapper on a native bool type
+type Boolean struct {
+        Value bool
+}
+
+// Type returns BooleanObj (BOOLEAN)
+func (b *Boolean) Type() Type <span class="cov0" title="0">{
+        return BooleanObj
+}</span>
+
+// Inspect the native bool value
+func (b *Boolean) Inspect() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%t", b.Value)
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package object
+
+// Builtin represent a builtin construct of the interpreter
+type Builtin struct {
+        Fn         BuiltinFunction
+        RequireEnv bool
+        EnvName    string
+}
+
+// Type returns BuiltinObj (BUILTIN)
+func (b *Builtin) Type() Type <span class="cov0" title="0">{
+        return BuiltinObj
+}</span>
+
+// Inspect simply returns the string "builtin function"
+func (b *Builtin) Inspect() string <span class="cov0" title="0">{
+        return "builtin function"
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package object
+
+// Environment is the construct that holds the variables (and associated values) declared by the user
+// It also has a reference to its outer environement (if any); allowing for some scoping
+type Environment struct {
+        store map[string]Object
+        outer *Environment
+}
+
+// NewEnvironmentWithParams creates a new instance with some predefined values
+func NewEnvironmentWithParams(tickets string) *Environment <span class="cov0" title="0">{
+        env := NewEnvironment()
+        env.Set("repopath", &amp;String{Value: "."})
+        env.Set("tickets", &amp;String{Value: tickets})
+
+        return env
+}</span>
+
+// NewEnvironment creates new instance with no outer environement (top-level)
+func NewEnvironment() *Environment <span class="cov0" title="0">{
+        s := make(map[string]Object)
+
+        env := &amp;Environment{store: s, outer: nil}
+
+        return env
+}</span>
+
+// NewEnclosedEnvironment creates new instance that's enclosed in an existing one.
+func NewEnclosedEnvironment(outer *Environment) *Environment <span class="cov0" title="0">{
+        env := NewEnvironment()
+        env.outer = outer
+
+        return env
+}</span>
+
+// Get returns the value of the specified variable name
+func (e *Environment) Get(name string) (Object, bool) <span class="cov0" title="0">{
+        obj, ok := e.store[name]
+        if !ok &amp;&amp; e.outer != nil </span><span class="cov0" title="0">{
+                obj, ok = e.outer.Get(name)
+        }</span>
+        <span class="cov0" title="0">return obj, ok</span>
+}
+
+// Set adds an entry to the environment internal store for a new or existing variable
+func (e *Environment) Set(name string, val Object) Object <span class="cov0" title="0">{
+        e.store[name] = val
+        return val
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package object
+
+// Error is an object that encloses an error message and allows error management within the interpreter
+type Error struct {
+        Message string
+}
+
+// Type returns ErrorObj (ERROR)
+func (e *Error) Type() Type <span class="cov0" title="0">{
+        return ErrorObj
+}</span>
+
+// Inspect returns the error message enclosed in the error object
+func (e *Error) Inspect() string <span class="cov0" title="0">{
+        return "ERROR: " + e.Message
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package object
+
+import (
+        "bytes"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/ast"
+        "strings"
+)
+
+// BuiltinFunction represent a function builtin to the interpreter (meaning not user-defined)
+type BuiltinFunction func(args ...Object) Object
+
+// Function is an executable block
+type Function struct {
+        Parameters []*ast.Identifier
+        Body       *ast.BlockStatement
+        Env        *Environment
+}
+
+// Type returns FunctionObj (FUNCTION)
+func (f *Function) Type() Type <span class="cov0" title="0">{
+        return FunctionObj
+}</span>
+
+// Inspect the body and parameters of the Function type
+func (f *Function) Inspect() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+
+        params := []string{}
+        for _, p := range f.Parameters </span><span class="cov0" title="0">{
+                params = append(params, p.String())
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString("fn")
+        out.WriteString("(")
+        out.WriteString(strings.Join(params, ", "))
+        out.WriteString(") {\n")
+        out.WriteString(f.Body.String())
+        out.WriteString("\n}")
+
+        return out.String()</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package object
+
+import (
+        "bytes"
+        "fmt"
+        "hash/fnv"
+        "strings"
+)
+
+// Hashable is an interface to be implemented by object that can by hashed
+type Hashable interface {
+        HashKey() HashKey
+}
+
+// HashKey is the value (unsigned integer) of the hash key
+type HashKey struct {
+        Type  Type
+        Value uint64
+}
+
+// HashPair is an object that can be inserted into the Hash construct
+type HashPair struct {
+        Key   Object
+        Value Object
+}
+
+// Hash is a simple map, mapping HashKey to HashPair
+type Hash struct {
+        Pairs map[HashKey]HashPair
+}
+
+// HashKey returns the hashkey of a boolean
+// TODO optimize perf by caching their return values
+func (b *Boolean) HashKey() HashKey <span class="cov0" title="0">{
+        var value uint64
+
+        if b.Value </span><span class="cov0" title="0">{
+                value = 1
+        }</span> else<span class="cov0" title="0"> {
+                value = 0
+        }</span>
+
+        <span class="cov0" title="0">return HashKey{Type: b.Type(), Value: value}</span>
+}
+
+// HashKey returns the hashkey of an integer
+// TODO optimize perf by caching their return values
+func (i *Integer) HashKey() HashKey <span class="cov0" title="0">{
+        return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}</span>
+
+// HashKey returns the hashkey of a string
+// TODO optimize perf by caching their return values
+func (s *String) HashKey() HashKey <span class="cov10" title="6">{
+        h := fnv.New64a()
+        h.Write([]byte(s.Value))
+
+        return HashKey{Type: s.Type(), Value: h.Sum64()}
+}</span>
+
+// Type returns HashObj (HASH)
+func (h *Hash) Type() Type <span class="cov0" title="0">{
+        return HashObj
+}</span>
+
+// Inspect returns the string value of the pairs contained in the hash
+func (h *Hash) Inspect() string <span class="cov0" title="0">{
+        var out bytes.Buffer
+        pairs := []string{}
+
+        for _, pair := range h.Pairs </span><span class="cov0" title="0">{
+                pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect()))
+        }</span>
+
+        <span class="cov0" title="0">out.WriteString("{")
+        out.WriteString(strings.Join(pairs, ", "))
+        out.WriteString("}")
+        return out.String()</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package object
+
+import "fmt"
+
+// Integer is a wrapper on a native int64 type
+type Integer struct {
+        Value int64
+}
+
+// Type returns IntegerObj (INTEGER)
+func (i *Integer) Type() Type <span class="cov0" title="0">{
+        return IntegerObj
+}</span>
+
+// Inspect the native int64 tyoe
+func (i *Integer) Inspect() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%d", i.Value)
+}</span>
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package object
+
+// Null is the construct used to represent null values in the AST
+type Null struct {
+}
+
+// Type returns NullObj (NULL)
+func (n *Null) Type() Type <span class="cov0" title="0">{
+        return NullObj
+}</span>
+
+// Inspect simply returns "null"
+func (n *Null) Inspect() string <span class="cov0" title="0">{
+        return "null"
+}</span>
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package object
+
+import "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/scl"
+
+// Repo is a wrapper for the interpreter of scl.GlifRepo object which itself wraps the *git.Repository
+type Repo struct {
+        Repo scl.GlifRepo
+        Path Object
+}
+
+// Type returns RepoObj (REPO)
+func (r *Repo) Type() Type <span class="cov0" title="0">{
+        return RepoObj
+}</span>
+
+// Inspect the specified path (string) of the repo
+func (r *Repo) Inspect() string <span class="cov0" title="0">{
+        return r.Path.Inspect()
+}</span>
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package object
+
+// ReturnValue is a wrapper for whatever value is passed by a return call
+type ReturnValue struct {
+        Value Object
+}
+
+// Type returns ReturnValueObj (RETURN_VALUE)
+func (rv *ReturnValue) Type() Type <span class="cov0" title="0">{
+        return ReturnValueObj
+}</span>
+
+// Inspect the inner value of the Object (any object implementing the interface Object)
+func (rv *ReturnValue) Inspect() string <span class="cov0" title="0">{
+        return rv.Value.Inspect()
+}</span>
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package object
+
+// String is a wraper on a native string type
+type String struct {
+        Value string
+}
+
+// Type returns StringObj (STRING)
+func (s *String) Type() Type <span class="cov10" title="6">{
+        return StringObj
+}</span>
+
+// Inspect the native string value
+func (s *String) Inspect() string <span class="cov0" title="0">{
+        return s.Value
+}</span>
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package object
+
+import (
+        "github.com/go-git/go-git/v5/plumbing/object"
+)
+
+// Tag is a wrapper for the interpreter of the *object.Tag (go-git) object
+type Tag struct {
+        Value Object
+        Tag   *object.Tag
+}
+
+// Type returns TagObj (TAG)
+func (t *Tag) Type() Type <span class="cov0" title="0">{
+        return TagObj
+}</span>
+
+// Inspect the value which is the name of the git tag
+func (t *Tag) Inspect() string <span class="cov0" title="0">{
+        return t.Value.Inspect()
+}</span>
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">// Package parser contains the definition of the parser element of the glif interpreter.
+//
+// If also declare the following:
+//        - Precedence constants
+//        - map of token/precedence
+//         - prefix and infix functions
+//        - parsing method for recognize tokens
+package parser
+
+import (
+        "fmt"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/ast"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/gitoken"
+        "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/lexer"
+        "strconv"
+)
+
+// Contant used in the precedence parsing for operator
+const (
+        _ int = iota
+        LOWEST
+        TO          // -&gt;
+        EQUALS      // ==
+        LESSGREATER // &lt; or &gt;
+        SUM         // +
+        PRODUCT     // *
+        PREFIX      // -X or !X
+        CALL        // myFunction(X)
+        INDEX       // array[index]
+)
+
+// Map associating tokens given by the lexer to a specific precedence
+var precedences = map[gitoken.TokenType]int{
+        gitoken.TO:       TO,
+        gitoken.EQ:       EQUALS,
+        gitoken.NOTEQ:    EQUALS,
+        gitoken.LT:       LESSGREATER,
+        gitoken.GT:       LESSGREATER,
+        gitoken.PLUS:     SUM,
+        gitoken.MINUS:    SUM,
+        gitoken.SLASH:    PRODUCT,
+        gitoken.ASTERISK: PRODUCT,
+        gitoken.LPAREN:   CALL,
+        gitoken.LBRAKET:  INDEX,
+}
+
+type (
+        prefixParseFn func() ast.Expression
+        infixParseFn  func(ast.Expression) ast.Expression
+)
+
+// Parser is the representation of the glif parser
+// It contains the following:
+//        - A slice of errors (parsing error)
+//        - The current token AND the next (peek) token
+//        - Maps containing the prefix AND infix parse functions
+type Parser struct {
+        l         *lexer.Lexer
+        errors    []string
+        showTrace bool
+
+        currentToken gitoken.Token
+        peekToken    gitoken.Token
+
+        prefixParseFns map[gitoken.TokenType]prefixParseFn
+        infixParseFns  map[gitoken.TokenType]infixParseFn
+}
+
+// NewWithOptions creates a new parser from a lexer and additionnal bool options
+// The creation of the parser is done via the New function and not directly here,
+// that way there is only one place where the parser is instantiated.
+func NewWithOptions(l *lexer.Lexer, showTrace bool) *Parser <span class="cov0" title="0">{
+        p := New(l)
+        p.showTrace = showTrace
+
+        return p
+}</span>
+
+// New creates a new parser from a lexer and register the prefix/infix parsing functions
+func New(l *lexer.Lexer) *Parser <span class="cov6" title="62">{
+        p := &amp;Parser{
+                l:         l,
+                errors:    []string{},
+                showTrace: false,
+        }
+        p.nextToken()
+        p.nextToken()
+
+        p.prefixParseFns = make(map[gitoken.TokenType]prefixParseFn)
+        p.registerPrefix(gitoken.IDENT, p.parseIdentifier)
+        p.registerPrefix(gitoken.INT, p.parseIntegerLiteral)
+        p.registerPrefix(gitoken.BANG, p.parsePrefixExpression)
+        p.registerPrefix(gitoken.MINUS, p.parsePrefixExpression)
+        p.registerPrefix(gitoken.TRUE, p.parseBoolean)
+        p.registerPrefix(gitoken.FALSE, p.parseBoolean)
+        p.registerPrefix(gitoken.LPAREN, p.parseGroupedExpression)
+        p.registerPrefix(gitoken.IF, p.parseIfExpression)
+        p.registerPrefix(gitoken.FUNCTION, p.parseFunctionLiteral)
+        p.registerPrefix(gitoken.STRING, p.parseStringLiteral)
+        p.registerPrefix(gitoken.LBRAKET, p.parseArrayLiteral)
+        p.registerPrefix(gitoken.LBRACE, p.parseHashLiteral)
+
+        p.infixParseFns = make(map[gitoken.TokenType]infixParseFn)
+        p.registerInfix(gitoken.PLUS, p.parseInfixExpression)
+        p.registerInfix(gitoken.MINUS, p.parseInfixExpression)
+        p.registerInfix(gitoken.SLASH, p.parseInfixExpression)
+        p.registerInfix(gitoken.ASTERISK, p.parseInfixExpression)
+        p.registerInfix(gitoken.EQ, p.parseInfixExpression)
+        p.registerInfix(gitoken.NOTEQ, p.parseInfixExpression)
+        p.registerInfix(gitoken.LT, p.parseInfixExpression)
+        p.registerInfix(gitoken.GT, p.parseInfixExpression)
+        p.registerInfix(gitoken.LPAREN, p.parseCallExpression)
+        p.registerInfix(gitoken.LBRAKET, p.parseIndexExpression)
+        p.registerInfix(gitoken.TO, p.parseInfixExpression)
+
+        return p
+}</span>
+
+// Errors returns the errors found (if any) while parsing
+func (p *Parser) Errors() []string <span class="cov6" title="62">{
+        return p.errors
+}</span>
+
+// ParseProgram is the entry point of the parser. It returns the *ast.Program node which represents the entire script.
+func (p *Parser) ParseProgram() *ast.Program <span class="cov6" title="62">{
+        program := &amp;ast.Program{}
+        program.Statements = []ast.Statement{}
+
+        for !p.currentTokenIs(gitoken.EOF) </span><span class="cov6" title="66">{
+                stmt := p.parseStatement()
+                if stmt != nil </span><span class="cov6" title="66">{
+                        program.Statements = append(program.Statements, stmt)
+                }</span>
+                <span class="cov6" title="66">p.nextToken()</span>
+        }
+
+        <span class="cov6" title="62">return program</span>
+}
+
+// Advance the current token the next one (peek) and set the next one (peek) to the lexer's next token.
+func (p *Parser) nextToken() <span class="cov9" title="542">{
+        p.currentToken = p.peekToken
+        p.peekToken = p.l.NextToken()
+}</span>
+
+func (p *Parser) registerPrefix(tokenType gitoken.TokenType, fn prefixParseFn) <span class="cov10" title="744">{
+        p.prefixParseFns[tokenType] = fn
+}</span>
+
+func (p *Parser) registerInfix(tokenType gitoken.TokenType, fn infixParseFn) <span class="cov9" title="682">{
+        p.infixParseFns[tokenType] = fn
+}</span>
+
+func (p *Parser) noPrefixParseFnError(t gitoken.TokenType) <span class="cov0" title="0">{
+        msg := fmt.Sprintf("no prefix parse function for %s found", t)
+        p.errors = append(p.errors, msg)
+}</span>
+
+// Parse an ast.Statement (LET/SET/RETURN) or an expression statement by default.
+func (p *Parser) parseStatement() ast.Statement <span class="cov6" title="70">{
+        switch p.currentToken.Type </span>{
+        case gitoken.LET:<span class="cov2" title="3">
+                return p.parseLetStatement()</span>
+        case gitoken.SET:<span class="cov1" title="2">
+                return p.parseSetStatement()</span>
+        case gitoken.RETURN:<span class="cov2" title="3">
+                return p.parseReturnStatement()</span>
+        default:<span class="cov6" title="62">
+                return p.parseExpressionStatement()</span>
+        }
+}
+
+// Parse an expression, either prefix or infix.
+func (p *Parser) parseExpression(precedence int) ast.Expression <span class="cov8" title="208">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov8" title="208">prefix := p.prefixParseFns[p.currentToken.Type]
+        if prefix == nil </span><span class="cov0" title="0">{
+                p.noPrefixParseFnError(p.currentToken.Type)
+                return nil
+        }</span>
+        <span class="cov8" title="208">leftExp := prefix()
+
+        for !p.peekTokenIs(gitoken.SEMICOLON) &amp;&amp; precedence &lt; p.peekPrecedence() </span><span class="cov7" title="92">{
+                infix := p.infixParseFns[p.peekToken.Type]
+                if infix == nil </span><span class="cov0" title="0">{
+                        return leftExp
+                }</span>
+
+                <span class="cov7" title="92">p.nextToken()
+
+                leftExp = infix(leftExp)</span>
+        }
+
+        <span class="cov8" title="208">return leftExp</span>
+}
+
+func (p *Parser) parseLetStatement() *ast.LetStatement <span class="cov2" title="3">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseLetStatement " + p.currentToken.Literal))
+        }</span>
+        <span class="cov2" title="3">stmt := &amp;ast.LetStatement{Token: p.currentToken}
+        if !p.expectPeek(gitoken.IDENT) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov2" title="3">stmt.Name = &amp;ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+        if !p.expectPeek(gitoken.ASSIGN) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov2" title="3">p.nextToken()
+
+        stmt.Value = p.parseExpression(LOWEST)
+        if p.peekTokenIs(gitoken.SEMICOLON) </span><span class="cov2" title="3">{
+                p.nextToken()
+        }</span>
+
+        <span class="cov2" title="3">return stmt</span>
+}
+
+func (p *Parser) parseSetStatement() *ast.SetStatement <span class="cov1" title="2">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseSetStatement " + p.currentToken.Literal))
+        }</span>
+        <span class="cov1" title="2">stmt := &amp;ast.SetStatement{Token: p.currentToken}
+        if !p.expectPeek(gitoken.REPOPATH) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov1" title="2">stmt.Name = &amp;ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+        p.nextToken()
+
+        stmt.Value = p.parseStringLiteral()
+        if p.peekTokenIs(gitoken.SEMICOLON) </span><span class="cov1" title="1">{
+                p.nextToken()
+        }</span>
+
+        <span class="cov1" title="2">return stmt</span>
+}
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement <span class="cov2" title="3">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseReturnStatement " + p.currentToken.Literal))
+        }</span>
+        <span class="cov2" title="3">stmt := &amp;ast.ReturnStatement{Token: p.currentToken}
+
+        p.nextToken()
+
+        stmt.ReturnValue = p.parseExpression(LOWEST)
+        if p.peekTokenIs(gitoken.SEMICOLON) </span><span class="cov2" title="3">{
+                p.nextToken()
+        }</span>
+
+        <span class="cov2" title="3">return stmt</span>
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement <span class="cov6" title="62">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseExpressionStatement " + p.currentToken.Literal))
+        }</span>
+        <span class="cov6" title="62">stmt := &amp;ast.ExpressionStatement{Token: p.currentToken}
+
+        stmt.Expression = p.parseExpression(LOWEST)
+
+        if p.peekTokenIs(gitoken.SEMICOLON) </span><span class="cov3" title="9">{
+                p.nextToken()
+        }</span>
+
+        <span class="cov6" title="62">return stmt</span>
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement <span class="cov3" title="7">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseBlockStatement " + p.currentToken.Literal))
+        }</span>
+        <span class="cov3" title="7">block := &amp;ast.BlockStatement{Token: p.currentToken}
+        block.Statements = []ast.Statement{}
+
+        p.nextToken()
+
+        for !p.currentTokenIs(gitoken.RBRACE) &amp;&amp; !p.currentTokenIs(gitoken.EOF) </span><span class="cov2" title="4">{
+                stmt := p.parseStatement()
+                if stmt != nil </span><span class="cov2" title="4">{
+                        block.Statements = append(block.Statements, stmt)
+                }</span>
+                <span class="cov2" title="4">p.nextToken()</span>
+        }
+
+        <span class="cov3" title="7">return block</span>
+}
+
+func (p *Parser) parseIdentifier() ast.Expression <span class="cov6" title="61">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseIdentifier " + p.currentToken.Literal))
+        }</span>
+        <span class="cov6" title="61">return &amp;ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}</span>
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression <span class="cov7" title="97">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseIntegerLiteral " + p.currentToken.Literal))
+        }</span>
+        <span class="cov7" title="97">il := &amp;ast.IntegerLiteral{Token: p.currentToken}
+
+        value, err := strconv.ParseInt(p.currentToken.Literal, 0, 64)
+        if err != nil </span><span class="cov0" title="0">{
+                msg := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+                p.errors = append(p.errors, msg)
+                return nil
+        }</span>
+
+        <span class="cov7" title="97">il.Value = value
+        return il</span>
+}
+
+func (p *Parser) parseStringLiteral() ast.Expression <span class="cov3" title="9">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseStringLiteral " + p.currentToken.Literal))
+        }</span>
+        <span class="cov3" title="9">return &amp;ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}</span>
+}
+
+func (p *Parser) parseArrayLiteral() ast.Expression <span class="cov2" title="3">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseArrayLiteral " + p.currentToken.Literal))
+        }</span>
+        <span class="cov2" title="3">array := &amp;ast.ArrayLiteral{Token: p.currentToken}
+        array.Elements = p.parseExpressionList(gitoken.RBRAKET)
+        return array</span>
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression <span class="cov2" title="3">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseHashLiteral " + p.currentToken.Literal))
+        }</span>
+        <span class="cov2" title="3">hash := &amp;ast.HashLiteral{Token: p.currentToken}
+        hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+        for !p.peekTokenIs(gitoken.RBRACE) </span><span class="cov3" title="6">{
+                p.nextToken()
+                key := p.parseExpression(LOWEST)
+
+                if !p.expectPeek(gitoken.COLON) </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+
+                <span class="cov3" title="6">p.nextToken()
+                value := p.parseExpression(LOWEST)
+
+                hash.Pairs[key] = value
+
+                if !p.peekTokenIs(gitoken.RBRACE) &amp;&amp; !p.expectPeek(gitoken.COMMA) </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+        }
+
+        <span class="cov2" title="3">if !p.expectPeek(gitoken.RBRACE) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov2" title="3">return hash</span>
+}
+
+func (p *Parser) parseBoolean() ast.Expression <span class="cov4" title="16">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseBoolean " + p.currentToken.Literal))
+        }</span>
+        <span class="cov4" title="16">return &amp;ast.Boolean{Token: p.currentToken, Value: p.currentTokenIs(gitoken.TRUE)}</span>
+}
+
+func (p *Parser) parseFunctionLiteral() ast.Expression <span class="cov2" title="4">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseFunctionLiteral " + p.currentToken.Literal))
+        }</span>
+        <span class="cov2" title="4">fl := &amp;ast.FunctionLiteral{Token: p.currentToken}
+
+        if !p.expectPeek(gitoken.LPAREN) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov2" title="4">fl.Parameters = p.parseFunctionParameters()
+
+        if !p.expectPeek(gitoken.LBRACE) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov2" title="4">fl.Body = p.parseBlockStatement()
+
+        return fl</span>
+}
+
+func (p *Parser) parseFunctionParameters() []*ast.Identifier <span class="cov2" title="4">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseFunctionParameters " + p.currentToken.Literal))
+        }</span>
+        <span class="cov2" title="4">identifiers := []*ast.Identifier{}
+
+        if p.peekTokenIs(gitoken.RPAREN) </span><span class="cov1" title="1">{
+                p.nextToken()
+                return identifiers
+        }</span>
+
+        <span class="cov2" title="3">p.nextToken()
+
+        id := &amp;ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+        identifiers = append(identifiers, id)
+
+        for p.peekTokenIs(gitoken.COMMA) </span><span class="cov2" title="3">{
+                p.nextToken()
+                p.nextToken()
+                id := &amp;ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+                identifiers = append(identifiers, id)
+        }</span>
+
+        <span class="cov2" title="3">if !p.expectPeek(gitoken.RPAREN) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov2" title="3">return identifiers</span>
+}
+
+func (p *Parser) parsePrefixExpression() ast.Expression <span class="cov4" title="10">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parsePrefixExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov4" title="10">expression := &amp;ast.PrefixExpression{
+                Token:    p.currentToken,
+                Operator: p.currentToken.Literal,
+        }
+
+        p.nextToken()
+
+        expression.Right = p.parseExpression(PREFIX)
+        return expression</span>
+}
+
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression <span class="cov6" title="81">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseInfixExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov6" title="81">expression := &amp;ast.InfixExpression{
+                Token:    p.currentToken,
+                Left:     left,
+                Operator: p.currentToken.Literal,
+        }
+
+        precedence := p.currentPrecedence()
+        p.nextToken()
+        expression.Right = p.parseExpression(precedence)
+
+        return expression</span>
+}
+
+func (p *Parser) parseGroupedExpression() ast.Expression <span class="cov3" title="5">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseGroupedExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov3" title="5">p.nextToken()
+
+        exp := p.parseExpression(LOWEST)
+
+        if !p.expectPeek(gitoken.RPAREN) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov3" title="5">return exp</span>
+}
+
+func (p *Parser) parseIfExpression() ast.Expression <span class="cov1" title="2">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseIfExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov1" title="2">expression := &amp;ast.IfExpression{Token: p.currentToken}
+
+        if !p.expectPeek(gitoken.LPAREN) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov1" title="2">p.nextToken()
+        expression.Condition = p.parseExpression(LOWEST)
+
+        if !p.expectPeek(gitoken.RPAREN) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov1" title="2">if !p.expectPeek(gitoken.LBRACE) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov1" title="2">expression.Consequence = p.parseBlockStatement()
+
+        if p.peekTokenIs(gitoken.ELSE) </span><span class="cov1" title="1">{
+                p.nextToken()
+
+                if !p.expectPeek(gitoken.LBRACE) </span><span class="cov0" title="0">{
+                        return nil
+                }</span>
+
+                <span class="cov1" title="1">expression.Alternative = p.parseBlockStatement()</span>
+        }
+
+        <span class="cov1" title="2">return expression</span>
+}
+
+func (p *Parser) parseCallExpression(fn ast.Expression) ast.Expression <span class="cov3" title="6">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseCallExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov3" title="6">exp := &amp;ast.CallExpression{Token: p.currentToken, Function: fn}
+        exp.Arguments = p.parseExpressionList(gitoken.RPAREN)
+        return exp</span>
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression <span class="cov3" title="5">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseIndexExpression " + p.currentToken.Literal))
+        }</span>
+        <span class="cov3" title="5">exp := &amp;ast.IndexExpression{Token: p.currentToken, Left: left}
+
+        p.nextToken()
+        exp.Index = p.parseExpression(LOWEST)
+
+        if !p.expectPeek(gitoken.RBRAKET) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov3" title="5">return exp</span>
+}
+
+func (p *Parser) parseExpressionList(end gitoken.TokenType) []ast.Expression <span class="cov3" title="9">{
+        if p.showTrace </span><span class="cov0" title="0">{
+                defer untrace(trace("parseExpressionList " + p.currentToken.Literal))
+        }</span>
+        <span class="cov3" title="9">list := []ast.Expression{}
+
+        if p.peekTokenIs(end) </span><span class="cov0" title="0">{
+                p.nextToken()
+                return list
+        }</span>
+
+        <span class="cov3" title="9">p.nextToken()
+        list = append(list, p.parseExpression(LOWEST))
+
+        for p.peekTokenIs(gitoken.COMMA) </span><span class="cov4" title="16">{
+                p.nextToken()
+                p.nextToken()
+                list = append(list, p.parseExpression(LOWEST))
+        }</span>
+
+        <span class="cov3" title="9">if !p.expectPeek(end) </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov3" title="9">return list</span>
+}
+
+// Return the precedence of the current token
+func (p *Parser) currentPrecedence() int <span class="cov6" title="81">{
+        if p, ok := precedences[p.currentToken.Type]; ok </span><span class="cov6" title="81">{
+                return p
+        }</span>
+
+        <span class="cov0" title="0">return LOWEST</span>
+}
+
+// Return the precedence of the next (peek) token
+func (p *Parser) peekPrecedence() int <span class="cov8" title="284">{
+        if p, ok := precedences[p.peekToken.Type]; ok </span><span class="cov7" title="116">{
+                return p
+        }</span>
+
+        <span class="cov7" title="168">return LOWEST</span>
+}
+
+// Check whether the current token is of a certain type
+func (p *Parser) currentTokenIs(t gitoken.TokenType) bool <span class="cov7" title="159">{
+        return p.currentToken.Type == t
+}</span>
+
+// Check whether the next (peek) token is of a certain type
+func (p *Parser) peekTokenIs(t gitoken.TokenType) bool <span class="cov9" title="489">{
+        return p.peekToken.Type == t
+}</span>
+
+// Check whether the next (peek) token is of a certain type and advances the current token if true. Otherwise returns
+// an error
+func (p *Parser) expectPeek(t gitoken.TokenType) bool <span class="cov6" title="58">{
+        if p.peekTokenIs(t) </span><span class="cov6" title="58">{
+                p.nextToken()
+                return true
+        }</span>
+
+        <span class="cov0" title="0">p.peekError(t)
+        return false</span>
+}
+
+// Add a parser error because next (peek) token is not what was expected by the parser
+func (p *Parser) peekError(t gitoken.TokenType) <span class="cov0" title="0">{
+        msg := fmt.Sprintf("expected next token to be %s, got %s instead",
+                t, p.peekToken.Type)
+        p.errors = append(p.errors, msg)
+}</span>
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package parser
+
+import (
+        "fmt"
+        "strings"
+)
+
+var traceLevel int
+
+const traceIdentPlaceholder string = "\t"
+
+func identLevel() string <span class="cov0" title="0">{
+        return strings.Repeat(traceIdentPlaceholder, traceLevel-1)
+}</span>
+
+func tracePrint(fs string) <span class="cov0" title="0">{
+        fmt.Printf("%s%s\n", identLevel(), fs)
+}</span>
+
+func incIdent() <span class="cov0" title="0">{ traceLevel = traceLevel + 1 }</span>
+func decIdent() <span class="cov0" title="0">{ traceLevel = traceLevel - 1 }</span>
+
+func trace(msg string) string <span class="cov0" title="0">{
+        incIdent()
+        tracePrint("BEGIN " + msg)
+        return msg
+}</span>
+
+func untrace(msg string) <span class="cov0" title="0">{
+        tracePrint("END " + msg)
+        decIdent()
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
