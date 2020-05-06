@@ -94,7 +94,7 @@ COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
 test-coverage-tools: | $(GOCOVMERGE) $(GOCOV) $(GOCOVXML)
 #test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage_$(shell date +"%Y%m%d_%H%M%S%Z")
-test-coverage: COVERAGE_DIR := $(CURDIR)/test_coverage")
+test-coverage: COVERAGE_DIR := $(CURDIR)/test_coverage
 test-coverage: fmt test-coverage-tools ; $(info $(M) running coverage tests...) @ ## Run coverage tests
 	$Q mkdir -p $(COVERAGE_DIR)/coverage
 	$Q for pkg in $(TESTPKGS); do \
@@ -122,7 +122,7 @@ fmt: ; $(info $(M) running gofmt...) @ ## Run gofmt on all source files
 .PHONY: clean
 clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
 	@rm -rf $(BIN)
-	@rm -rf test/tests.* test/coverage.*
+	@rm -rf test/tests.* test_coverage/.*
 	@mkdir  $(BIN)
 	@touch $(BIN)/.gitkeep
 
