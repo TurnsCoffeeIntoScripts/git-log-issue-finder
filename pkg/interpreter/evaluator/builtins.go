@@ -167,6 +167,10 @@ var builtins = map[string]*object.Builtin{
 					buffer.WriteString("([0-9]+)")
 				} else if cc == "." {
 					buffer.WriteString("\\.")
+				} else if cc == "*" {
+					buffer.WriteString(".*")
+				} else if cc == "+" {
+					buffer.WriteString(".+")
 				} else {
 					buffer.WriteString(cc)
 				}
