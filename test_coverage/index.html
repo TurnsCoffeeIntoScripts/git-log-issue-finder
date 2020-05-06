@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/ast/ast.go (21.8%)</option>
+				<option value="file0">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/ast/ast.go (34.7%)</option>
 				
 				<option value="file1">github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/evaluator/builtins.go (20.0%)</option>
 				
@@ -266,14 +266,14 @@ func (p *Program) TokenLiteral() string <span class="cov0" title="0">{
         <span class="cov0" title="0">return ""</span>
 }
 
-func (p *Program) String() string <span class="cov8" title="3">{
+func (p *Program) String() string <span class="cov10" title="7">{
         var out bytes.Buffer
 
-        for _, s := range p.Statements </span><span class="cov8" title="3">{
+        for _, s := range p.Statements </span><span class="cov10" title="7">{
                 out.WriteString(s.String())
         }</span>
 
-        <span class="cov8" title="3">return out.String()</span>
+        <span class="cov10" title="7">return out.String()</span>
 }
 
 func (i *Identifier) expressionNode() {<span class="cov0" title="0">
@@ -285,7 +285,7 @@ func (i *Identifier) TokenLiteral() string <span class="cov0" title="0">{
         return i.Token.Literal
 }</span>
 
-func (i *Identifier) String() string <span class="cov10" title="4">{
+func (i *Identifier) String() string <span class="cov8" title="5">{
         return i.Value
 }</span>
 
@@ -293,18 +293,18 @@ func (ls *LetStatement) statementNode() {<span class="cov0" title="0">
 
 }</span>
 
-func (ls *LetStatement) String() string <span class="cov5" title="2">{
+func (ls *LetStatement) String() string <span class="cov4" title="2">{
         var out bytes.Buffer
 
         out.WriteString(ls.TokenLiteral() + " ")
         out.WriteString(ls.Name.String())
         out.WriteString(" = ")
 
-        if ls.Value != nil </span><span class="cov5" title="2">{
+        if ls.Value != nil </span><span class="cov4" title="2">{
                 out.WriteString(ls.Value.String())
         }</span>
 
-        <span class="cov5" title="2">out.WriteString(";")
+        <span class="cov4" title="2">out.WriteString(";")
         return out.String()</span>
 }
 
@@ -335,7 +335,7 @@ func (ls *SetStatement) String() string <span class="cov1" title="1">{
 }
 
 // TokenLiteral returns the literal string of the token
-func (ls *LetStatement) TokenLiteral() string <span class="cov5" title="2">{
+func (ls *LetStatement) TokenLiteral() string <span class="cov4" title="2">{
         return ls.Token.Literal
 }</span>
 
@@ -344,19 +344,19 @@ func (rs *ReturnStatement) statementNode() {<span class="cov0" title="0">
 }</span>
 
 // TokenLiteral returns the literal string of the token
-func (rs *ReturnStatement) TokenLiteral() string <span class="cov0" title="0">{
+func (rs *ReturnStatement) TokenLiteral() string <span class="cov4" title="2">{
         return rs.Token.Literal
 }</span>
 
-func (rs *ReturnStatement) String() string <span class="cov0" title="0">{
+func (rs *ReturnStatement) String() string <span class="cov4" title="2">{
         var out bytes.Buffer
 
         out.WriteString(rs.TokenLiteral() + " ")
 
-        if rs.ReturnValue != nil </span><span class="cov0" title="0">{
+        if rs.ReturnValue != nil </span><span class="cov4" title="2">{
                 out.WriteString(rs.ReturnValue.String())
         }</span>
-        <span class="cov0" title="0">out.WriteString(";")
+        <span class="cov4" title="2">out.WriteString(";")
         return out.String()</span>
 }
 
@@ -369,8 +369,8 @@ func (es *ExpressionStatement) TokenLiteral() string <span class="cov0" title="0
         return es.Token.Literal
 }</span>
 
-func (es *ExpressionStatement) String() string <span class="cov0" title="0">{
-        if es.Expression != nil </span><span class="cov0" title="0">{
+func (es *ExpressionStatement) String() string <span class="cov4" title="2">{
+        if es.Expression != nil </span><span class="cov4" title="2">{
                 return es.Expression.String()
         }</span>
 
@@ -475,7 +475,7 @@ func (il *IntegerLiteral) TokenLiteral() string <span class="cov0" title="0">{
         return il.Token.Literal
 }</span>
 
-func (il *IntegerLiteral) String() string <span class="cov1" title="1">{
+func (il *IntegerLiteral) String() string <span class="cov6" title="3">{
         return il.Token.Literal
 }</span>
 
@@ -501,7 +501,7 @@ func (b *Boolean) TokenLiteral() string <span class="cov0" title="0">{
         return b.Token.Literal
 }</span>
 
-func (b *Boolean) String() string <span class="cov0" title="0">{
+func (b *Boolean) String() string <span class="cov1" title="1">{
         return b.Token.Literal
 }</span>
 
@@ -514,7 +514,7 @@ func (pe *PrefixExpression) TokenLiteral() string <span class="cov0" title="0">{
         return pe.Token.Literal
 }</span>
 
-func (pe *PrefixExpression) String() string <span class="cov0" title="0">{
+func (pe *PrefixExpression) String() string <span class="cov4" title="2">{
         var out bytes.Buffer
 
         out.WriteString("(")

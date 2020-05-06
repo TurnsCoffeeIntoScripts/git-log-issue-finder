@@ -1,10 +1,4 @@
 mode: atomic
-github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:12.26,14.2 1 0
-github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:16.28,18.2 1 0
-github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:20.17,20.48 1 0
-github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:21.17,21.48 1 0
-github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:23.31,27.2 3 0
-github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:29.26,32.2 2 0
 github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go:72.61,77.2 3 0
 github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go:80.34,117.2 29 62
 github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go:120.36,122.2 1 62
@@ -160,3 +154,9 @@ github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/pa
 github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go:595.2,596.14 2 0
 github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go:590.22,593.3 2 58
 github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser.go:600.49,604.2 2 0
+github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:12.26,14.2 1 0
+github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:16.28,18.2 1 0
+github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:20.17,20.48 1 0
+github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:21.17,21.48 1 0
+github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:23.31,27.2 3 0
+github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser/parser_tracing.go:29.26,32.2 2 0

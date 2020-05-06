@@ -100,11 +100,11 @@ func TestPrefixExpression1(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&ExpressionStatement{
-				Token:      gitoken.Token{},
+				Token: gitoken.Token{},
 				Expression: &PrefixExpression{
 					Token:    gitoken.Token{Type: gitoken.BANG, Literal: "!"},
 					Operator: gitoken.BANG,
-					Right:    &Boolean{
+					Right: &Boolean{
 						Token: gitoken.Token{Type: gitoken.IDENT, Literal: "true"},
 						Value: true,
 					},
@@ -120,11 +120,11 @@ func TestPrefixExpression2(t *testing.T) {
 	program := &Program{
 		Statements: []Statement{
 			&ExpressionStatement{
-				Token:      gitoken.Token{},
+				Token: gitoken.Token{},
 				Expression: &PrefixExpression{
 					Token:    gitoken.Token{Type: gitoken.MINUS, Literal: "-"},
 					Operator: gitoken.MINUS,
-					Right:    &IntegerLiteral{
+					Right: &IntegerLiteral{
 						Token: gitoken.Token{Type: gitoken.IDENT, Literal: "73"},
 						Value: 73,
 					},
