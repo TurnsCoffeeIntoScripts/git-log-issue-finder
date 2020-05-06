@@ -6,8 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] 
 ### Added
-- Added the 'HEAD' keyword so the 'diff-tags' command can read the git HEAD
-
+- Added the glif interpreter to process glif script
+- Complete refactor of the application flow and parameters to go with new interpreter
+### Changed
+- Updated release script
+- Updated README.md
+### Removed
+- 'from' and 'to' variables (now replaced by glif scripting)
 
 ## [1.0.0 ==> 1.4.0] - 2020-01-07
 ### Added

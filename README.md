@@ -7,9 +7,12 @@ Version: 1.4.0
 
 ## Content:
 1. [Usage](#usage)
-2. [Pipeline Configuration](#pipeline_configuration)
-3. [Task Configuration](#task_configuration)
-4. [Contact](#contact)
+2. [diff-tags](#diff_tags_conf)
+    1. [Basic Format](#Basic-format)
+    1. [Examples](#Examples)
+3. [Pipeline Configuration](#pipeline_configuration)
+4. [Task Configuration](#task_configuration)
+5. [Contact](#contact)
 
 ## <a name="usage" href="usage">Usage</a>
 While this program was designed with the idea of integrating it to a *<a href="https://concourse-ci.org/" target="_blank">Concourse</a>* pipeline it can also be used a stand-alone
@@ -69,6 +72,53 @@ $>
 ```
 
 If both '--full-history' and 'since-latest-tag' are specified then the '--full-history' is the one that'll take precedence.
+
+## <a name="diff_tags_conf" href="diff_tags_conf">--diff-tags</a>
+The 'diff-tags' parameters allows you to specify a very specific range of tags for glif to look into.
+In the next subsection various example will be given so that developpers may have a starting point.
+
+Each given 'diff-tags' value should then be used like this ```--diff-tags="<VALUE>"```.
+
+### Basic format
+The value given to 'diff-tags' will always be matched against the following regex:
+```([a-zA-Z0-9.\-_@()/]+)==>([a-zA-Z0-9.\-_@()/]+)```.
+
+Before the '==>' (arrow) if refered to as the 'from' and after the arrow is refered to as the 'to'. 
+Therefore we have something that can be read as: FROM (tag) ==> TO (tag). 
+
+### Examples
+#### Basic example 1
+This first example simply uses hard-coded values:
+```
+1.0.0-rc.1==>1.0.0-rc.2
+```
+This one will show all the matching tickets from the release candidate 1 to the release candidate 2
+of version 1.0.0.
+
+#### Basic example 2
+Similarly to the first example, here we are searching between the first release candidate and the
+actual release. 
+```
+1.0.0-rc.1==>1.0.0
+```
+
+#### Advanced example 1
+Let's take the first example again but make it a little more generic. A genuine need that could arise is
+to have the tickets that were worked on in the last release candidate. So the first example (the difference
+between the first and second rc) covers that need when creating the tag 1.0.0-rc.2. 
+
+But since we don't want to change the arguments of 'diff-tags' everytime we do a new release candidate, 
+we can have this:
+
+```
+1.0.0-rc.@(LATEST-1)==>1.0.0-rc.@(LATEST)
+```
+This will lookup the tickets between the latest rc and the rc before that one (still for version 1.0.0).
+
+#### Advanced example 2
+```
+@(SEMVER_LATEST)-rc.@(LATEST-1)==>@(SEMVER_LATEST)-rc.@(LATEST)
+```
 
 ## <a name="pipeline_configuration" href="pipeline_configuration">Pipeline Configuration</a>
 

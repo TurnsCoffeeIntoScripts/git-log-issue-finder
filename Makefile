@@ -23,15 +23,21 @@ all: fmt $(BIN) ; $(info $(M) building executable...) @ ## Build program binary
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
+.PHONY: alldebug
+alldebug: fmt $(BIN) ; $(info $(M) building executable with debug info...) @ ## Build program binary with debug info
+	$Q $(GO) build \
+		-gcflags='all=-N -l' \
+		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
+
 .PHONY: full
-full: fmt lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary (with go lint)
+full: fmt test lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 .PHONY: release
-release: fmt lint $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
+release: fmt test lint $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
@@ -131,6 +137,11 @@ version: ; $(info $(M) version...)	@ ## Prints current version
 run: all ; $(info $(M) running $(PACKAGE)...) @ ## Run the latest build
 	@echo $(PACKAGE) needs arguments
 	cd $(BIN) && ./$(PACKAGE) --help
+
+.PHONY: debug
+debug: alldebug ; $(info $(M) running in debug $(PACKAGE)...) @ ## Run the latest build in debug
+	@echo $(PACKAGE) debugging on port 2345
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./bin/$(PACKAGE)
 
 %:
 	@:

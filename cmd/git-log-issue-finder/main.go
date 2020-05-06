@@ -1,133 +1,70 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/configuration"
-	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/diff"
-	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/find"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/helpers"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/evaluator"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/lexer"
+	iobject "github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/object"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/parser"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/interpreter/repl"
+	"github.com/TurnsCoffeeIntoScripts/git-log-issue-finder/pkg/script"
 	"log"
-	"sort"
+	"os"
 )
 
-// TicketSlice slice containing the extracted tickets from the content of the log that was provided
-var TicketSlice []string
-
-// Full text for the usage of '--diff-tags'
-var diffTagDesc = "This parameter takes a specially formatted string: <FROM_TAG>==><TO_TAG>\n" +
-	"\tThe '==>' is litteral\n" +
-	"\tThe '<FROM_TAG>' and '<TO_TAG>' can have 2 formats:\n" +
-	"\t\t1- A litteral tag name\n" +
-	"\t\t2- A string with parameters (see below)\n" +
-	"Parameters are values declared between the '@(' and ')' litterals. Possible parameters:\n" +
-	"\tLATEST: finds the latest value matching the string\n" +
-	"\tLATEST-N: finds the Nth commit behind the latest value matching the string\n" +
-	"Examples:\n" +
-	"--diff-tags=\"v1.0.0-rc.@(LATEST)==>v1.0.0-rc.@(LATEST-1)\"\n" +
-	"\tThis will return the issues found between the latest RC of version 1.0.0 and the RC before that one"
-
 func main() {
-	// Parameters
-	ticketRegex := flag.String("tickets", "", "Comma-separated list of jira project keys")
-	repoDir := flag.String("directory", "./", "The directory of the git repo")
-	diffTags := flag.String("diff-tags", "", diffTagDesc)
-
-	// Flags
-	fullHistory := flag.Bool("full-history", false, "Search the entire git log")
-	sinceLatestTag := flag.Bool("since-latest-tag", false, "Search only from HEAD to the most recent tag")
-	forceFetch := flag.Bool("force-fetch", false, "Force a 'git fetch' operation on the specified repository")
-
-	flag.Parse()
-
-	// Validating mandatory params
-	configuration.ValidateParam(ticketRegex, "Missing parameter '--tickets'")
-	configuration.ValidateParam(repoDir, "Missing parameter '--directory'")
-
-	// Only one should be set
-	if *fullHistory == *sinceLatestTag {
-		*fullHistory = true
-		*sinceLatestTag = false
+	glifParam := configuration.GlifParameters{}
+	forceRepl := false
+	if len(os.Args) == 1 {
+		forceRepl = true
 	}
 
-	repo, err := git.PlainOpen(*repoDir)
-	if err != nil {
-		fmt.Print(err.Error())
-		log.Fatal("an error occured while instantiating a new repository object")
+	if ok := glifParam.Parse(forceRepl); !ok {
+		log.Fatal("failed to properly parse input flags")
 	}
 
-	if forceFetch != nil && *forceFetch {
-		if fetchErr := repo.Fetch(&git.FetchOptions{}); fetchErr != nil {
-			fmt.Println(fetchErr.Error())
-			log.Print("an error occured while trying to fetch repo. Continuing without fetching...")
-		}
+	if err := start(glifParam); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
 	}
-
-	ref, err := repo.Head()
-	if err != nil {
-		fmt.Print(err)
-		log.Fatal("an error occured while retrieving the HEAD reference")
-	}
-
-	hashFrom, hashTo := configuration.ExtractFromToHash(repo, extractTagList(repo), *diffTags)
-
-	if hashFrom != plumbing.ZeroHash && hashTo != plumbing.ZeroHash {
-		commits := diff.FromTagToTag(repo, hashFrom, hashTo)
-		TicketSlice = find.CommitMatching(commits, *ticketRegex)
-	} else if *sinceLatestTag {
-		commits := make([]*object.Commit, 0)
-		iter, err := repo.TagObjects()
-		hashLatest := find.LatestTag(iter, ref.Hash(), err)
-		commits = diff.FromTagToTag(repo, hashLatest, ref.Hash())
-		TicketSlice = find.CommitMatching(commits, *ticketRegex)
-	} else if *fullHistory {
-		iter, err := repo.Log(&git.LogOptions{From: ref.Hash()})
-		if err != nil {
-			fmt.Print(err.Error())
-			log.Fatal("an error occured while retrieving the commit history")
-		}
-
-		err = iter.ForEach(func(c *object.Commit) error {
-			if presentInMessage, ticket := find.Tickets(c.Message, *ticketRegex); presentInMessage {
-				TicketSlice = append(TicketSlice, ticket...)
-			}
-
-			return nil
-		})
-	}
-
-	TicketSlice = ensureUniqueValues(TicketSlice)
-
-	fmt.Println(TicketSlice)
 }
 
-func ensureUniqueValues(s []string) []string {
-	keys := make(map[string]bool)
-	var list []string
-	for _, entry := range s {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
+func start(glifParam configuration.GlifParameters) error {
+	if helpers.IsBoolPtrTrue(glifParam.Flags.REPL) {
+		repl.Start(os.Stdin, os.Stdout)
+		return nil
 	}
 
-	return list
-}
+	var input *string
 
-func extractTagList(repo *git.Repository) []string {
-	tags := make([]string, 0)
-
-	iter, err := repo.TagObjects()
-	if err == nil {
-		err = iter.ForEach(func(tag *object.Tag) error {
-			tags = append(tags, tag.Name)
-
-			return nil
-		})
+	if helpers.IsBoolPtrTrue(glifParam.Scripts.UseDiffLatestSemverWithLatestBuilds) {
+		input = &script.DiffLatestSemverWithLatestBuilds
+	} else if helpers.IsBoolPtrTrue(glifParam.Scripts.UseDiffLatestSemverWithLatestRCs) {
+		input = &script.DiffLatestSemverWithLatestRCs
+	} else if helpers.IsBoolPtrTrue(glifParam.Scripts.UseDiffLatestSemver) {
+		input = &script.DiffLatestSemver
+	} else {
+		input = glifParam.Script
 	}
 
-	sort.Strings(tags)
-	return tags
+	l := lexer.New(*input)
+	p := parser.NewWithOptions(l, false)
+
+	program := p.ParseProgram()
+	if len(p.Errors()) != 0 {
+		repl.PrintParserErrors(os.Stdout, p.Errors())
+		return fmt.Errorf("error parsing script")
+	}
+
+	env := iobject.NewEnvironmentWithParams(*glifParam.Tickets)
+	evaluated := evaluator.Eval(program, env)
+
+	switch evaluated.(type) {
+	case *iobject.Error:
+		return fmt.Errorf(fmt.Sprintf("%s", evaluated.Inspect()))
+	default:
+		return nil
+	}
 }
