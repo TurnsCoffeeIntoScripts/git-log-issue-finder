@@ -22,9 +22,7 @@ func TestLetStatement1(t *testing.T) {
 		},
 	}
 
-	if program.String() != "let myVar = anotherVar;" {
-		t.Errorf("program.String() wrong. got=%q", program.String())
-	}
+	checkTest(t, program, "let myVar = anotherVar;")
 }
 
 func TestLetStatement2(t *testing.T) {
@@ -44,9 +42,7 @@ func TestLetStatement2(t *testing.T) {
 		},
 	}
 
-	if program.String() != "let x = 42;" {
-		t.Errorf("program.String() wrong. got=%q", program.String())
-	}
+	checkTest(t, program, "let x = 42;")
 }
 
 func TestSetStatement1(t *testing.T) {
@@ -66,7 +62,82 @@ func TestSetStatement1(t *testing.T) {
 		},
 	}
 
-	if program.String() != "set repopath \".\";" {
-		t.Errorf("program.String() wrong. got=%q", program.String())
+	checkTest(t, program, "set repopath \".\";")
+}
+
+func TestReturnStatement1(t *testing.T) {
+	program := &Program{
+		Statements: []Statement{
+			&ReturnStatement{
+				Token: gitoken.Token{Type: gitoken.RETURN, Literal: "return"},
+				ReturnValue: &IntegerLiteral{
+					Token: gitoken.Token{Type: gitoken.IDENT, Literal: "23"},
+				},
+			},
+		},
+	}
+
+	checkTest(t, program, "return 23;")
+}
+
+func TestReturnStatement2(t *testing.T) {
+	program := &Program{
+		Statements: []Statement{
+			&ReturnStatement{
+				Token: gitoken.Token{Type: gitoken.RETURN, Literal: "return"},
+				ReturnValue: &Identifier{
+					Token: gitoken.Token{Type: gitoken.IDENT, Literal: "x"},
+					Value: "x",
+				},
+			},
+		},
+	}
+
+	checkTest(t, program, "return x;")
+}
+
+func TestPrefixExpression1(t *testing.T) {
+	program := &Program{
+		Statements: []Statement{
+			&ExpressionStatement{
+				Token:      gitoken.Token{},
+				Expression: &PrefixExpression{
+					Token:    gitoken.Token{Type: gitoken.BANG, Literal: "!"},
+					Operator: gitoken.BANG,
+					Right:    &Boolean{
+						Token: gitoken.Token{Type: gitoken.IDENT, Literal: "true"},
+						Value: true,
+					},
+				},
+			},
+		},
+	}
+
+	checkTest(t, program, "(!true)")
+}
+
+func TestPrefixExpression2(t *testing.T) {
+	program := &Program{
+		Statements: []Statement{
+			&ExpressionStatement{
+				Token:      gitoken.Token{},
+				Expression: &PrefixExpression{
+					Token:    gitoken.Token{Type: gitoken.MINUS, Literal: "-"},
+					Operator: gitoken.MINUS,
+					Right:    &IntegerLiteral{
+						Token: gitoken.Token{Type: gitoken.IDENT, Literal: "73"},
+						Value: 73,
+					},
+				},
+			},
+		},
+	}
+
+	checkTest(t, program, "(-73)")
+}
+
+func checkTest(t *testing.T, program *Program, expected string) {
+	if program.String() != expected {
+		t.Errorf("program.String() wrong. \ngot=%q\nexpected=%q", program.String(), expected)
 	}
 }
