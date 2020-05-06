@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Contains check if a tag is present in an array by name. If so it returns that element
 func Contains(arr []*object.Tag, elemName string) (*object.Tag, bool) {
 	for idx := range arr {
 		if strings.Contains(arr[idx].Name, elemName) {

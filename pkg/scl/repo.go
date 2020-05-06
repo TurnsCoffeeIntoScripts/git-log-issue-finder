@@ -127,6 +127,7 @@ func (glifRepo *GlifRepo) GetLatestTag(offset int64) *object.Tag {
 	return glifRepo.tagsLatestToEarliest[offset]
 }
 
+// GetSpecificTag returns the appropriate *object.Tag that correspond to the specified name
 func (glifRepo *GlifRepo) GetSpecificTag(tagName string) *object.Tag {
 	if elem, ok := helpers.Contains(glifRepo.tagsLatestToEarliest, tagName); ok {
 		return elem
