@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] 
 
 ## [2.0.0] - 2020-05-13
+
+## [2.0.0] - 2020-05-13
 ### Added
 - Added the glif interpreter to process glif script
 - Added documentation and examples
