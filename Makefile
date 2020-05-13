@@ -23,15 +23,21 @@ all: fmt $(BIN) ; $(info $(M) building executable...) @ ## Build program binary
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
+.PHONY: alldebug
+alldebug: fmt $(BIN) ; $(info $(M) building executable with debug info...) @ ## Build program binary with debug info
+	$Q $(GO) build \
+		-gcflags='all=-N -l' \
+		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
+
 .PHONY: full
-full: fmt lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary (with go lint)
+full: fmt test lint $(BIN) ; $(info $(M) building executable...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
 		-o $(BIN)/$(PACKAGE) cmd/git-log-issue-finder/main.go
 
 .PHONY: release
-release: fmt lint $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
+release: fmt test lint $(BIN) ; $(info $(M) building release (with upx tool)...) @ ## Build program binary (with go lint)
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-s -w -X $(PACKAGE)/cmd.Version=$(VERSION) -X $(PACKAGE)/cmd.BuildDate=$(DATE)' \
@@ -73,7 +79,7 @@ test-verbose: ARGS=-v            ## Run tests in verbose mode with coverage repo
 test-race:    ARGS=-race         ## Run tests with race detector
 $(TEST_TARGETS): NAME=$(MAKECMDGOALS:test-%=%)
 $(TEST_TARGETS): test
-check test tests: fmt lint ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests
+check test tests: fmt ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests
 	$Q $(GO) test -timeout $(TIMEOUT)s $(ARGS) $(TESTPKGS)
 
 test-xml: fmt lint | $(GO2XUNIT) ; $(info $(M) running $(NAME:%=% )tests...) @ ## Run tests with xUnit output
@@ -87,8 +93,9 @@ COVERAGE_XML = $(COVERAGE_DIR)/coverage.xml
 COVERAGE_HTML = $(COVERAGE_DIR)/index.html
 .PHONY: test-coverage test-coverage-tools
 test-coverage-tools: | $(GOCOVMERGE) $(GOCOV) $(GOCOVXML)
-test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage.$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-test-coverage: fmt lint test-coverage-tools ; $(info $(M) running coverage tests...) @ ## Run coverage tests
+#test-coverage: COVERAGE_DIR := $(CURDIR)/test/coverage_$(shell date +"%Y%m%d_%H%M%S%Z")
+test-coverage: COVERAGE_DIR := $(CURDIR)/test_coverage
+test-coverage: fmt test-coverage-tools ; $(info $(M) running coverage tests...) @ ## Run coverage tests
 	$Q mkdir -p $(COVERAGE_DIR)/coverage
 	$Q for pkg in $(TESTPKGS); do \
 		$(GO) test \
@@ -115,7 +122,7 @@ fmt: ; $(info $(M) running gofmt...) @ ## Run gofmt on all source files
 .PHONY: clean
 clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
 	@rm -rf $(BIN)
-	@rm -rf test/tests.* test/coverage.*
+	@rm -rf test/tests.* test_coverage/.*
 	@mkdir  $(BIN)
 	@touch $(BIN)/.gitkeep
 
@@ -131,6 +138,11 @@ version: ; $(info $(M) version...)	@ ## Prints current version
 run: all ; $(info $(M) running $(PACKAGE)...) @ ## Run the latest build
 	@echo $(PACKAGE) needs arguments
 	cd $(BIN) && ./$(PACKAGE) --help
+
+.PHONY: debug
+debug: alldebug ; $(info $(M) running in debug $(PACKAGE)...) @ ## Run the latest build in debug
+	@echo $(PACKAGE) debugging on port 2345
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec ./bin/$(PACKAGE)
 
 %:
 	@:
