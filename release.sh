@@ -65,6 +65,7 @@ echo "=================================================================="
 echo -e ${GREEN}"git add/commit/push of README.md and changelog.md"${NO_COLOR}
 git add README.md
 git add changelog.md
+git add pkg/version/version.go
 git commit -m"Incrementing version in doc and version.go ($1)"
 git push
 
