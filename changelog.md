@@ -5,10 +5,6 @@ The format of this file is based on [Keep a Changelog](https://keepachangelog.co
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] 
-
-## [2.0.0] - 2020-05-13
-
-## [2.0.0] - 2020-05-13
 ### Added
 - Added the glif interpreter to process glif script
 - Added documentation and examples
