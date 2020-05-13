@@ -225,7 +225,8 @@ func (p *Parser) parseSetStatement() *ast.SetStatement {
 		defer untrace(trace("parseSetStatement " + p.currentToken.Literal))
 	}
 	stmt := &ast.SetStatement{Token: p.currentToken}
-	if !p.expectPeek(gitoken.REPOPATH) {
+
+	if !p.expectPeekMultiplePossibility(gitoken.REPOPATH, gitoken.TICKETS) {
 		return nil
 	}
 
@@ -596,9 +597,30 @@ func (p *Parser) expectPeek(t gitoken.TokenType) bool {
 	return false
 }
 
+// Check whether the next (peek) token is one of the specified types and advances the current token if true. Otherwise returns
+// an error
+func (p *Parser) expectPeekMultiplePossibility(t ...gitoken.TokenType) bool {
+	for _, tknType := range t {
+		if p.peekTokenIs(tknType) {
+			p.nextToken()
+			return true
+		}
+	}
+
+	p.multiplePossibilityPeekError(t...)
+	return false
+}
+
 // Add a parser error because next (peek) token is not what was expected by the parser
 func (p *Parser) peekError(t gitoken.TokenType) {
 	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
+		t, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
+// Add a parser error because next (peek) token is not what was expected by the parser
+func (p *Parser) multiplePossibilityPeekError(t ...gitoken.TokenType) {
+	msg := fmt.Sprintf("expected next token(s) to be one of the following %v, got %s instead",
 		t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }

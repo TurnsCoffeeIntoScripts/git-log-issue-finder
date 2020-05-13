@@ -45,9 +45,12 @@ echo -e ${GREEN}"Updating the versions constant in pkg/version/version.go with t
 case $2 in
     MAJOR)
         sed -r -i 's/(major\s=\s)([0-9]+)/echo "\t\1$((\2+1))"/ge' pkg/version/version.go
+        sed -r -i 's/(minor\s=\s)([0-9]+)/echo "\tminor = 0"/ge' pkg/version/version.go
+        sed -r -i 's/(patch\s=\s)([0-9]+)/echo "\tpatch = 0"/ge' pkg/version/version.go
         ;;
     MINOR)
         sed -r -i 's/(minor\s=\s)([0-9]+)/echo "\t\1$((\2+1))"/ge' pkg/version/version.go
+        sed -r -i 's/(patch\s=\s)([0-9]+)/echo "\tpatch = 0"/ge' pkg/version/version.go
         ;;
     PATCH)
         sed -r -i 's/(patch\s=\s)([0-9]+)/echo "\t\1$((\2+1))"/ge' pkg/version/version.go

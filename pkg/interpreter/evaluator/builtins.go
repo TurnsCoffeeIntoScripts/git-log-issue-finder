@@ -201,7 +201,7 @@ var builtins = map[string]*object.Builtin{
 				return newError("Unable to convert args[1] to *object.String while executing 'getTag'")
 			}
 
-			tag := repo.Repo.GetSpecificTag(tagName.Value)
+			tag := repo.Repo.GetSpecificTag(tagName.Value, true)
 			if tag == nil {
 				return NULL
 			}
@@ -281,7 +281,8 @@ var builtins = map[string]*object.Builtin{
 				return newError("an error occured while retrieving the commit history from 'toHash'")
 			}
 
-			fmt.Printf("Performing diff on %s --> %s\n", from.Tag.Name, to.Tag.Name)
+			// TODO: Uncomment the following line if needed when debugging
+			//fmt.Printf("Performing diff on %s --> %s\n", from.Tag.Name, to.Tag.Name)
 
 			// ----------------------------
 			// Initialize the commit slices

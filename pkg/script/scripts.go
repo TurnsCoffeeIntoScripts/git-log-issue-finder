@@ -11,8 +11,8 @@ let version="$.$.$-build.$";
 
 extractTags(repo, version);
 
-let to = getLatestTag(repo, 0);
 let from = getLatestTag(repo, 1);
+let to = getLatestTag(repo, 0);
 
 diff(repo, from, to);
 `
@@ -27,8 +27,8 @@ let version="$.$.$-rc.$";
 
 extractTags(repo, version);
 
-let to = getLatestTag(repo, 0);
 let from = getLatestTag(repo, 1);
+let to = getLatestTag(repo, 0);
 
 diff(repo, from, to);
 `
@@ -43,8 +43,8 @@ let version="$.$.$";
 
 extractTags(repo, version);
 
-let to = getLatestTag(repo, 0);
 let from = getLatestTag(repo, 1);
+let to = getLatestTag(repo, 0);
 
 diff(repo, from, to);
 `

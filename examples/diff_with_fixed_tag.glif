@@ -1,0 +1,11 @@
+set repopath ".";
+
+let repo = initRepo();
+let version="$.$.$-build.$";
+
+extractTags(repo, version);
+
+let from = getTag(repo, "1.4.0");
+let to = getLatestTag(repo, 0);
+
+diff(repo, from, to);

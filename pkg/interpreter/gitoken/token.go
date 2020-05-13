@@ -1,7 +1,7 @@
 // Package gitoken (Glif Interpreter TOKEN) defines the list of recognized tokens
 package gitoken
 
-// Definition if the various constant for the tokens to be returned by the lexer
+// Definition of the various constant for the tokens to be returned by the lexer
 const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
@@ -48,6 +48,7 @@ const (
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
 	REPOPATH = "REPOPATH"
+	TICKETS  = "TICKETS"
 )
 
 // TokenType is a simple string to store the type of the token object
@@ -69,6 +70,7 @@ var keywords = map[string]TokenType{
 	"else":     ELSE,
 	"return":   RETURN,
 	"repopath": REPOPATH,
+	"tickets":  TICKETS,
 }
 
 // LookupIdent returns the TokenType of the keyword if the ident string is a keyword.
