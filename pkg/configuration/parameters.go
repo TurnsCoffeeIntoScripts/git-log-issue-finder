@@ -74,6 +74,7 @@ type GlifPreConfiguredScripts struct {
 	UseDiffLatestSemverWithLatestBuilds *bool
 	UseDiffLatestSemverWithLatestRCs    *bool
 	UseDiffLatestSemver                 *bool
+	UseDiffLatestSemverToHead           *bool
 	UseUserSpecifiedScript              *bool
 }
 

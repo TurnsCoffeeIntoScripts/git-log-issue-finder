@@ -16,7 +16,6 @@ import (
 	"log"
 	"regexp"
 	"sort"
-	"strings"
 )
 
 // GlifRepo is an abstraction on top of the *git.Repository to allow extended functionnality.
@@ -120,29 +119,31 @@ func (glifRepo *GlifRepo) GetLatestTag(offset int64) *object.Tag {
 }
 
 // GetSpecificTag returns the appropriate *object.Tag that correspond to the specified name
-func (glifRepo *GlifRepo) GetSpecificTag(tagName string, extendedSearch bool) *object.Tag {
-	var obj *object.Tag
-	if elem, ok := helpers.Contains(glifRepo.tagsLatestToEarliest, tagName); ok {
-		return elem
-	} else if extendedSearch {
-		iter, err := glifRepo.GitRepo.Tags()
+func (glifRepo *GlifRepo) GetSpecificTag(tagName string) *object.Tag {
+	tagBuffer := make(map[string]*object.Tag, 0)
 
-		if err != nil {
-			return nil
-		}
+	r, _ := regexp.Compile(".*" + tagName + ".*")
 
-		_ = iter.ForEach(func(reference *plumbing.Reference) error {
-			tagObj, err := glifRepo.GitRepo.TagObject(reference.Hash())
-			if err == nil && tagObj != nil {
-				if strings.Contains(reference.Name().String(), tagName) {
-					obj = tagObj
-					return nil
-				}
-			}
+	iter, err := glifRepo.GitRepo.Tags()
 
-			return nil
-		})
+	if err != nil {
+		return nil
 	}
 
-	return obj
+	_ = iter.ForEach(func(reference *plumbing.Reference) error {
+		tagObj, err := glifRepo.GitRepo.TagObject(reference.Hash())
+		if err == nil && tagObj != nil {
+			if r.MatchString(reference.Name().String()) {
+				tagBuffer[tagName] = tagObj
+				return nil
+			}
+		}
+		return nil
+	})
+
+	if len(tagBuffer) == 1 {
+		return tagBuffer[tagName]
+	} else {
+		return nil
+	}
 }

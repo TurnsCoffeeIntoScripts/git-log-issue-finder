@@ -201,7 +201,7 @@ var builtins = map[string]*object.Builtin{
 				return newError("Unable to convert args[1] to *object.String while executing 'getTag'")
 			}
 
-			tag := repo.Repo.GetSpecificTag(tagName.Value, true)
+			tag := repo.Repo.GetSpecificTag(tagName.Value)
 			if tag == nil {
 				return NULL
 			}
