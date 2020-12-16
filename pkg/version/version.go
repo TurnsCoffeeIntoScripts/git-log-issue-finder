@@ -7,7 +7,7 @@ import "fmt"
 const (
 	major = 2
 	minor = 0
-	patch = 0
+	patch = 1
 	name  = "G.L.I.F."
 )
 
