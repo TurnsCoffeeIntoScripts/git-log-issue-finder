@@ -143,7 +143,7 @@ func (glifRepo *GlifRepo) GetSpecificTag(tagName string) *object.Tag {
 
 	if len(tagBuffer) == 1 {
 		return tagBuffer[tagName]
-	} else {
-		return nil
 	}
+
+	return nil
 }
